@@ -6,6 +6,7 @@ __pycache__/
 .kaggle/
 kaggle/
 dist/kaggle/
+results/kaggle/
 
 paper/*.aux
 paper/*.log

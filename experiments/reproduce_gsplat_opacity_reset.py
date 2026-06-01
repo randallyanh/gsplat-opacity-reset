@@ -43,12 +43,30 @@ Results (Tesla T4, 2026-04-15):
   Ablation: reset fraction dominates; age-200 and random-20% match within 0.02 dB
 """
 
-import argparse, datetime, json, math, platform
+import argparse, datetime, math, platform
 from pathlib import Path
-import torch
-import torch.nn.functional as F
+
+try:
+    from experiments.support_runtime import (
+        CudaUnavailableError,
+        EnvironmentCheckError,
+        GsplatOpacityResetError,
+        RunLogger,
+        write_json,
+    )
+except ModuleNotFoundError:
+    from support_runtime import (
+        CudaUnavailableError,
+        EnvironmentCheckError,
+        GsplatOpacityResetError,
+        RunLogger,
+        write_json,
+    )
 
 ALPHA_CUTOFF = 1.0 / 255.0
+LOGGER = RunLogger("gsplat-opacity-reset")
+torch = None
+F = None
 
 ARCHIVED_THRESHOLD_SWEEP_T4 = {
     "experiment": "threshold_isolation",
@@ -100,8 +118,26 @@ ARCHIVED_THRESHOLD_SWEEP_T4 = {
 # Helpers
 # ═══════════════════════════════════════════════════════════════════
 
+def require_torch():
+    global F, torch
+    if torch is not None and F is not None:
+        return torch, F
+    try:
+        import torch as torch_module
+        import torch.nn.functional as functional_module
+    except ModuleNotFoundError as exc:
+        raise EnvironmentCheckError(
+            "PyTorch is required for CUDA training probes",
+            original_error=repr(exc),
+        ) from exc
+    torch = torch_module
+    F = functional_module
+    return torch, F
+
+
 def compute_psnr(a, b):
-    mse = F.mse_loss(a, b).item()
+    _, functional = require_torch()
+    mse = functional.mse_loss(a, b).item()
     return -10 * math.log10(max(mse, 1e-10))
 
 W, H = 256, 256
@@ -115,8 +151,9 @@ target = None
 def init_cuda_state():
     global K, rasterization, target, viewmat
 
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA GPU required for the training probes")
+    torch_module, _ = require_torch()
+    if not torch_module.cuda.is_available():
+        raise CudaUnavailableError("CUDA GPU required for the training probes")
 
     from gsplat import rasterization as gsplat_rasterization
 
@@ -174,7 +211,13 @@ def train(means, quats, scales, opacities, sh0, steps, log_every=50):
         opt.zero_grad()
         if step % log_every == 0 or step == steps - 1:
             psnr = compute_psnr(r[0].detach(), target)
-            print(f"  step {step:4d}  PSNR={psnr:.2f}  loss={loss.item():.4f}")
+            LOGGER.progress(
+                "train",
+                step=step + 1,
+                total=steps,
+                psnr=round(psnr, 4),
+                loss=round(loss.item(), 6),
+            )
     return opt
 
 def snapshot(means, quats, scales, opacities, sh0):
@@ -214,9 +257,7 @@ def reset_and_recover(snap, means, quats, scales, opacities, sh0, mask, recovery
 
 
 def run_smoke():
-    print("\n" + "=" * 60)
-    print("SMOKE: small CUDA render/train/reset sanity check")
-    print("=" * 60)
+    LOGGER.section("SMOKE: small CUDA render/train/reset sanity check")
     N = 2_048
     means, quats, scales, opacities, sh0 = make_scene(N)
     train(means, quats, scales, opacities, sh0, steps=3, log_every=1)
@@ -229,9 +270,13 @@ def run_smoke():
     psnr_after, psnr_rec, below = reset_and_recover(
         snap, means, quats, scales, opacities, sh0, full_mask, 2
     )
-    print(
-        f"\nSmoke pre={pre:.2f} after={psnr_after:.2f} "
-        f"rec={psnr_rec:.2f} below_1/255={below}"
+    LOGGER.info(
+        "smoke_summary",
+        "Smoke reset/recovery summary",
+        pre=round(pre, 4),
+        after=round(psnr_after, 4),
+        recovered=round(psnr_rec, 4),
+        below_1_255=below,
     )
     return {
         "N": N,
@@ -247,9 +292,7 @@ def run_smoke():
 # Experiment 1: N=100K, 300 training steps
 # ═══════════════════════════════════════════════════════════════════
 def run_exp1():
-    print("\n" + "=" * 60)
-    print("EXPERIMENT 1: N=100K, 300 training steps")
-    print("=" * 60)
+    LOGGER.section("EXPERIMENT 1: N=100K, 300 training steps")
     N = 100_000
     means, quats, scales, opacities, sh0 = make_scene(N)
     train(means, quats, scales, opacities, sh0, steps=300)
@@ -266,19 +309,27 @@ def run_exp1():
     sa, sr, sb = reset_and_recover(snap, means, quats, scales, opacities, sh0, sel_mask, 100)
     na, nr, nb = reset_and_recover(snap, means, quats, scales, opacities, sh0, no_mask, 100)
 
-    print(f"\nBefore: {pre:.2f} | Full: {fa:.2f} (drop {fa-pre:+.2f}) rec={fr:.2f}")
-    print(f"Selective: {sa:.2f} (drop {sa-pre:+.2f}) rec={sr:.2f}")
-    print(f"No reset: {na:.2f} rec={nr:.2f}")
-    print(f">>> Gap at reset: +{sa-fa:.2f} dB")
+    LOGGER.info(
+        "exp1_summary",
+        "Experiment 1 reset gap",
+        pre=round(pre, 4),
+        full=round(fa, 4),
+        full_drop=round(fa - pre, 4),
+        full_rec=round(fr, 4),
+        selective=round(sa, 4),
+        selective_drop=round(sa - pre, 4),
+        selective_rec=round(sr, 4),
+        no_reset=round(na, 4),
+        no_reset_rec=round(nr, 4),
+        gap=round(sa - fa, 4),
+    )
     return {"pre": pre, "full": fa, "full_rec": fr, "sel": sa, "sel_rec": sr, "gap": sa-fa}
 
 # ═══════════════════════════════════════════════════════════════════
 # Experiment 2: N=500K, 200 training steps
 # ═══════════════════════════════════════════════════════════════════
 def run_exp2():
-    print("\n" + "=" * 60)
-    print("EXPERIMENT 2: N=500K, 200 training steps")
-    print("=" * 60)
+    LOGGER.section("EXPERIMENT 2: N=500K, 200 training steps")
     N = 500_000
     means, quats, scales, opacities, sh0 = make_scene(N)
     train(means, quats, scales, opacities, sh0, steps=200)
@@ -293,18 +344,25 @@ def run_exp2():
     fa, fr, _ = reset_and_recover(snap, means, quats, scales, opacities, sh0, full_mask, 50)
     sa, sr, _ = reset_and_recover(snap, means, quats, scales, opacities, sh0, sel_mask, 50)
 
-    print(f"\nBefore: {pre:.2f} | Full: {fa:.2f} (drop {fa-pre:+.2f}) rec={fr:.2f}")
-    print(f"Selective: {sa:.2f} (drop {sa-pre:+.2f}) rec={sr:.2f}")
-    print(f">>> Gap at reset: +{sa-fa:.2f} dB")
+    LOGGER.info(
+        "exp2_summary",
+        "Experiment 2 reset gap",
+        pre=round(pre, 4),
+        full=round(fa, 4),
+        full_drop=round(fa - pre, 4),
+        full_rec=round(fr, 4),
+        selective=round(sa, 4),
+        selective_drop=round(sa - pre, 4),
+        selective_rec=round(sr, 4),
+        gap=round(sa - fa, 4),
+    )
     return {"pre": pre, "full": fa, "full_rec": fr, "sel": sa, "sel_rec": sr, "gap": sa-fa}
 
 # ═══════════════════════════════════════════════════════════════════
 # Experiment 3: N=100K, 1000 training steps (mature support)
 # ═══════════════════════════════════════════════════════════════════
 def run_exp3():
-    print("\n" + "=" * 60)
-    print("EXPERIMENT 3: N=100K, 1000 training steps (MATURE)")
-    print("=" * 60)
+    LOGGER.section("EXPERIMENT 3: N=100K, 1000 training steps (MATURE)")
     N = 100_000
     means, quats, scales, opacities, sh0 = make_scene(N)
     train(means, quats, scales, opacities, sh0, steps=1000, log_every=200)
@@ -319,10 +377,21 @@ def run_exp3():
     fa, fr, fb = reset_and_recover(snap, means, quats, scales, opacities, sh0, full_mask, 100)
     sa, sr, sb = reset_and_recover(snap, means, quats, scales, opacities, sh0, sel_mask, 100)
 
-    print(f"\nBefore: {pre:.2f} | Full: {fa:.2f} (drop {fa-pre:+.2f}) rec={fr:.2f} below_1/255={fb}")
-    print(f"Selective: {sa:.2f} (drop {sa-pre:+.2f}) rec={sr:.2f}")
-    print(f">>> Gap at reset: +{sa-fa:.2f} dB")
-    print(f">>> Permanent loss: full={fr-pre:+.2f} dB, selective={sr-pre:+.2f} dB")
+    LOGGER.info(
+        "exp3_summary",
+        "Experiment 3 reset gap",
+        pre=round(pre, 4),
+        full=round(fa, 4),
+        full_drop=round(fa - pre, 4),
+        full_rec=round(fr, 4),
+        selective=round(sa, 4),
+        selective_drop=round(sa - pre, 4),
+        selective_rec=round(sr, 4),
+        gap=round(sa - fa, 4),
+        permanent_full=round(fr - pre, 4),
+        permanent_selective=round(sr - pre, 4),
+        below_1_255=fb,
+    )
     return {"pre": pre, "full": fa, "full_rec": fr, "sel": sa, "sel_rec": sr, "gap": sa-fa,
             "permanent_full": fr-pre, "permanent_sel": sr-pre, "below": fb}
 
@@ -330,9 +399,7 @@ def run_exp3():
 # Reset-fraction ablation: N=100K, 1000 training steps
 # ═══════════════════════════════════════════════════════════════════
 def run_reset_fraction_ablation():
-    print("\n" + "=" * 60)
-    print("RESET-FRACTION ABLATION: N=100K, 1000 training steps")
-    print("=" * 60)
+    LOGGER.section("RESET-FRACTION ABLATION: N=100K, 1000 training steps")
     N = 100_000
     train_steps = 1000
     means, quats, scales, opacities, sh0 = make_scene(N)
@@ -368,9 +435,14 @@ def run_reset_fraction_ablation():
             "drop": psnr_after - pre,
             "below_1_255": below,
         }
-        print(
-            f"  {name:12s} reset={reset_pct:6.1f}% "
-            f"drop={psnr_after - pre:+.2f} rec={psnr_rec:.2f}"
+        LOGGER.info(
+            "ablation_policy",
+            "Ablation policy result",
+            policy=name,
+            reset_pct=round(reset_pct, 4),
+            drop=round(psnr_after - pre, 4),
+            recovered=round(psnr_rec, 4),
+            below_1_255=below,
         )
 
     return {
@@ -387,15 +459,16 @@ def write_threshold_sweep_artifact(output_dir):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / "threshold_sweep_t4.json"
-    with output_path.open("w", encoding="utf-8") as f:
-        json.dump(ARCHIVED_THRESHOLD_SWEEP_T4, f, indent=2)
-    print(f"Wrote {output_path}")
+    write_json(output_path, ARCHIVED_THRESHOLD_SWEEP_T4)
+    LOGGER.info("artifact_written", "Wrote threshold sweep artifact", path=output_path)
     return ARCHIVED_THRESHOLD_SWEEP_T4
 
 # ═══════════════════════════════════════════════════════════════════
 # Main
 # ═══════════════════════════════════════════════════════════════════
-if __name__ == "__main__":
+def main():
+    global LOGGER
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--only",
@@ -413,16 +486,43 @@ if __name__ == "__main__":
         default="support_collapse_paper_results.json",
         help="Path for the combined JSON run record when CUDA probes are run.",
     )
+    parser.add_argument(
+        "--log-jsonl",
+        default=None,
+        help="Optional JSONL path for structured runtime logs.",
+    )
     args = parser.parse_args()
+
+    LOGGER.close()
+    LOGGER = RunLogger(
+        "gsplat-opacity-reset",
+        args.log_jsonl,
+        context={"selected": args.only},
+    )
+    LOGGER.info(
+        "run_start",
+        "Starting gsplat opacity-reset reproduction",
+        result_dir=args.result_dir,
+        output=args.output,
+        log_jsonl=args.log_jsonl,
+    )
 
     threshold = write_threshold_sweep_artifact(args.result_dir)
     if args.only == "threshold":
-        raise SystemExit(0)
+        LOGGER.info("run_complete", "Threshold artifact run complete")
+        return 0
 
     init_cuda_state()
-    print(f"PyTorch {torch.__version__}, CUDA {torch.version.cuda}")
-    print(f"GPU: {torch.cuda.get_device_name()}")
-    import gsplat; print(f"gsplat: {gsplat.__version__}")
+    import gsplat
+
+    LOGGER.info(
+        "runtime_environment",
+        "CUDA runtime ready",
+        pytorch=torch.__version__,
+        cuda_version=torch.version.cuda,
+        gpu_name=torch.cuda.get_device_name(),
+        gsplat=gsplat.__version__,
+    )
 
     smoke = run_smoke() if args.only == "smoke" else None
     r1 = run_exp1() if args.only in ("all", "exp1") else None
@@ -430,24 +530,43 @@ if __name__ == "__main__":
     r3 = run_exp3() if args.only in ("all", "exp3") else None
     ablation = run_reset_fraction_ablation() if args.only in ("all", "ablation") else None
 
-    print("\n" + "=" * 60)
-    print("FINAL SUMMARY")
-    print("=" * 60)
+    LOGGER.section("FINAL SUMMARY")
     if smoke is not None:
-        print(f"Smoke: pre={smoke['pre']:.2f} after={smoke['full']:.2f} rec={smoke['full_rec']:.2f}")
+        LOGGER.info(
+            "final_smoke",
+            "Smoke summary",
+            pre=round(smoke["pre"], 4),
+            after=round(smoke["full"], 4),
+            recovered=round(smoke["full_rec"], 4),
+        )
     if r1 is not None:
-        print(f"Exp1 (N=100K, 300 steps):  gap = +{r1['gap']:.2f} dB")
+        LOGGER.info("final_exp1", "Exp1 summary", gap=round(r1["gap"], 4))
     if r2 is not None:
-        print(f"Exp2 (N=500K, 200 steps):  gap = +{r2['gap']:.2f} dB")
+        LOGGER.info("final_exp2", "Exp2 summary", gap=round(r2["gap"], 4))
     if r3 is not None:
-        print(f"Exp3 (N=100K, 1000 steps): gap = +{r3['gap']:.2f} dB, permanent loss: full={r3['permanent_full']:+.2f} / sel={r3['permanent_sel']:+.2f}")
+        LOGGER.info(
+            "final_exp3",
+            "Exp3 summary",
+            gap=round(r3["gap"], 4),
+            permanent_full=round(r3["permanent_full"], 4),
+            permanent_selective=round(r3["permanent_sel"], 4),
+        )
     if ablation is not None:
-        print("Ablation:")
         for name, row in ablation["results"].items():
-            print(f"  {name:12s} reset={row['reset_pct']:6.1f}% drop={row['drop']:+.2f} rec={row['psnr_rec']:.2f}")
-    print()
+            LOGGER.info(
+                "final_ablation",
+                "Ablation summary",
+                policy=name,
+                reset_pct=round(row["reset_pct"], 4),
+                drop=round(row["drop"], 4),
+                recovered=round(row["psnr_rec"], 4),
+            )
     if r3 is not None and r3['gap'] > 1.0:
-        print(">>> SUPPORT COLLAPSE CONFIRMED on gsplat CUDA rasterizer")
+        LOGGER.info(
+            "support_collapse_confirmed",
+            "SUPPORT COLLAPSE CONFIRMED on gsplat CUDA rasterizer",
+            gap=round(r3["gap"], 4),
+        )
 
     output = {
         "environment": {
@@ -470,7 +589,20 @@ if __name__ == "__main__":
         output["table2_ablation"] = ablation
 
     output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as f:
-        json.dump(output, f, indent=2)
-    print(f"Wrote {output_path}")
+    write_json(output_path, output)
+    LOGGER.info("artifact_written", "Wrote combined run record", path=output_path)
+    LOGGER.info("run_complete", "Experiment run complete")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except GsplatOpacityResetError as exc:
+        LOGGER.exception("run_failed", exc)
+        raise SystemExit(exc.exit_code) from exc
+    except Exception as exc:
+        LOGGER.exception("unexpected_failure", exc)
+        raise
+    finally:
+        LOGGER.close()
