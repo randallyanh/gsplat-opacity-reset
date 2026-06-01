@@ -57,10 +57,12 @@ Use the project-local Python 3.12 environment and Kaggle CLI. The Kaggle
 workflow lives under `.codex/skills/kaggle-training/` and packages GPU runs as:
 
 1. a commit-pinned offline wheelhouse under `dist/kaggle/`;
-2. a private Kaggle Dataset, `randallyan/gsplat-opacity-reset-wheelhouse`, for
+2. a private Kaggle Dataset, `randallyan/gsplat-opacity-reset-source`, for the
+   source snapshot;
+3. a private Kaggle Dataset, `randallyan/gsplat-opacity-reset-wheelhouse`, for
    the dependency wheels;
-3. a private Kaggle script kernel with `dataset_sources` pointing at that
-   wheelhouse Dataset.
+4. a private Kaggle script kernel with `dataset_sources` pointing at both
+   Datasets.
 
 Remote runs write JSON artifacts plus `results/kaggle/run_kaggle.log.jsonl`,
 per-experiment JSONL logs, `training_status.json`, and
