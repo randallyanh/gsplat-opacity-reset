@@ -69,7 +69,8 @@ per-experiment JSONL logs, `training_status.json`, and
 `training_run_metadata.json`. Use Kaggle `--run-mode gpucheck` before smoke
 when diagnosing accelerator assignment. GPU kernel metadata uses
 `docker_image_pinning_type: latest` so kernels first created by CPU envcheck do
-not stay pinned to Kaggle's CPU-only Docker image.
+not stay pinned to Kaggle's CPU-only Docker image. Do not run smoke/full
+training until `gpucheck` sees `nvidia-smi` or `/dev/nvidia*` in Kaggle logs.
 
 ## Build Paper
 
