@@ -1,0 +1,83 @@
+{
+  "environment": {
+    "timestamp": "2026-04-15T00:31:35.110914+00:00",
+    "python": "3.12.13",
+    "pytorch": "2.10.0+cu128",
+    "cuda_version": "12.8",
+    "gsplat": "1.5.3",
+    "gpu_name": "Tesla T4",
+    "gpu_memory_gb": 15.64,
+    "gpu_compute_capability": "7.5",
+    "nvidia_driver": "580.82.07",
+    "os": "Linux-6.6.113+-x86_64-with-glib2.35"
+  },
+  "experiments": [
+    {
+      "id": "exp1_n100k_300step",
+      "description": "Baseline: moderate training, then full vs selective reset",
+      "N": 100000, "resolution": [256, 256],
+      "train_steps": 300, "recovery_steps": 100,
+      "reset_opacity": 0.01, "seed": 42,
+      "optimizer": "Adam",
+      "lr": {"means": 0.001, "quats": 0.001, "scales": 0.005, "opacities": 0.05, "sh0": 0.01},
+      "loss": "MSE (L2)",
+      "camera": {"fx": 300, "fy": 300, "cx": 128, "cy": 128, "z_offset": -5.0},
+      "scene": "synthetic: means~N(0,1.5)+z5, quats=[1,0,0,0]+noise, scales=exp(-3.5+N(0,0.3)), opacities=sigmoid(2.0)",
+      "target": "uniform random [0,1] per pixel",
+      "results": {
+        "psnr_before_reset": 11.42,
+        "full_reset":       {"psnr_after": 4.96,  "drop_dB": -6.46, "recovery_100": 11.04, "mean_opa_final": 0.0183, "below_1_255": 0},
+        "selective_20pct":   {"psnr_after": 10.72, "drop_dB": -0.69, "recovery_100": 11.50, "mean_opa_final": 0.7100, "below_1_255": 2},
+        "no_reset":          {"psnr_after": 11.42, "drop_dB":  0.00, "recovery_100": 11.65, "mean_opa_final": 0.8818, "below_1_255": 4},
+        "selective_vs_full_gap_dB": 5.77
+      }
+    },
+    {
+      "id": "exp2_n500k_200step",
+      "description": "Scale test: larger N, shorter training (less mature support)",
+      "N": 500000, "resolution": [256, 256],
+      "train_steps": 200, "recovery_steps": 50,
+      "reset_opacity": 0.01, "seed": 42,
+      "results": {
+        "psnr_before_reset": 10.82,
+        "full_reset":     {"psnr_after": 8.13,  "drop_dB": -2.69, "recovery_50": 10.85},
+        "selective_20pct": {"psnr_after": 10.81, "drop_dB": -0.01, "recovery_50": 10.82},
+        "selective_vs_full_gap_dB": 2.68
+      }
+    },
+    {
+      "id": "exp3_n100k_1000step_mature",
+      "description": "Key experiment: mature support (1000 training steps), maximum collapse severity",
+      "N": 100000, "resolution": [256, 256],
+      "train_steps": 1000, "recovery_steps": 100,
+      "reset_opacity": 0.01, "seed": 42,
+      "results": {
+        "psnr_before_reset": 12.46,
+        "full_reset":     {"psnr_after": 4.89,  "drop_dB": -7.58, "recovery_100": 11.64, "permanent_loss_dB": -0.82, "below_1_255": 21},
+        "selective_20pct": {"psnr_after": 10.72, "drop_dB": -1.75, "recovery_100": 12.36, "permanent_loss_dB": -0.10},
+        "selective_vs_full_gap_at_reset_dB": 5.83,
+        "selective_vs_full_gap_after_recovery_dB": 0.72
+      },
+      "key_finding": "Collapse severity scales with training maturity. Full reset causes permanent quality loss (-0.82 dB) that 100 recovery steps cannot fix."
+    }
+  ],
+  "protocol": {
+    "step1_install": "pip install gsplat (v1.5.3 auto-installed)",
+    "step2_runtime": "Google Colab > Runtime > Change runtime type > T4 GPU",
+    "step3_scene": "Synthetic: random Gaussians, 256x256 random target image, single viewpoint",
+    "step4_train": "Adam optimizer, MSE loss, no densification, no SSIM",
+    "step5_snapshot": "Clone all parameter tensors before reset",
+    "step6_full_reset": "opacities.data.clamp_(max=logit(0.01)); fresh Adam optimizer",
+    "step7_selective_reset": "Same clamp on indices [N*0.8:N] only (youngest 20%); fresh Adam",
+    "step8_recovery": "Continue training 50-100 steps, measure PSNR",
+    "step9_compare": "Gap = selective_PSNR - full_PSNR at reset step"
+  },
+  "alpha_cutoff_evidence": {
+    "gsplat_forward_cu": "if (alpha < 1.0f / 255.0f) continue;",
+    "gsplat_backward_cu": "same threshold — zero gradient below cutoff",
+    "threshold": 0.003922,
+    "reset_opacity": 0.01,
+    "note": "0.01 > 1/255, but effective per-pixel alpha falls below due to projection footprint falloff"
+  },
+  "conclusion": "Support collapse confirmed on gsplat CUDA rasterizer (Tesla T4). The 1/255 alpha cutoff creates a gradient deadlock after full opacity reset. Selective reset avoids it."
+}

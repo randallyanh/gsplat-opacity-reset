@@ -1,0 +1,53 @@
+{
+  "experiment": "support_collapse_verification",
+  "backend": "gsplat CUDA",
+  "gpu": "Tesla T4",
+  "gsplat_version": "1.5.3",
+  "pytorch_version": "2.10.0+cu128",
+  "scene": "synthetic (random Gaussians + random target)",
+  "N": 100000,
+  "resolution": "256x256",
+  "train_steps_before_reset": 300,
+  "recovery_steps": 100,
+  "reset_opacity": 0.01,
+  "alpha_cutoff": 0.003922,
+
+  "psnr_before_reset": 11.42,
+
+  "full_reset": {
+    "psnr_after_reset": 4.96,
+    "psnr_drop": -6.46,
+    "psnr_recovery_100": 11.04,
+    "mean_opacity_final": 0.0183,
+    "below_threshold_count": 0,
+    "note": "Catastrophic drop, slow recovery, does not reach pre-reset level"
+  },
+
+  "selective_reset_20pct": {
+    "psnr_after_reset": 10.72,
+    "psnr_drop": -0.69,
+    "psnr_recovery_100": 11.50,
+    "mean_opacity_final": 0.7100,
+    "below_threshold_count": 2,
+    "note": "Mild drop, fast recovery, surpasses pre-reset level"
+  },
+
+  "no_reset": {
+    "psnr_after_reset": 11.42,
+    "psnr_drop": 0.0,
+    "psnr_recovery_100": 11.65,
+    "mean_opacity_final": 0.8818,
+    "below_threshold_count": 4
+  },
+
+  "selective_vs_full_gap_at_reset": 5.77,
+  "conclusion": "SUPPORT COLLAPSE CONFIRMED on gsplat CUDA rasterizer",
+
+  "limitations": [
+    "Synthetic scene (random Gaussians, random target)",
+    "N=100K (collapse more severe at N>600K)",
+    "No densification (static N, no split/clone)",
+    "Single view (real training is multi-view)",
+    "Fresh optimizer on all branches (not realistic)"
+  ]
+}

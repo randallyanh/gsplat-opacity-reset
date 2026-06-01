@@ -1,0 +1,26 @@
+{
+  "experiment": "support_collapse_mature_gaussians",
+  "backend": "gsplat 1.5.3 CUDA",
+  "gpu": "Tesla T4",
+  "N": 100000,
+  "train_steps": 1000,
+  "recovery_steps": 100,
+  "psnr_before": 12.46,
+  "full_reset": {
+    "psnr_after": 4.89,
+    "drop": -7.58,
+    "recovery_100": 11.64,
+    "permanent_loss": -0.82,
+    "below_threshold": 21
+  },
+  "selective_20pct": {
+    "psnr_after": 10.72,
+    "drop": -1.75,
+    "recovery_100": 12.36,
+    "permanent_loss": -0.10
+  },
+  "gap_at_reset": 5.83,
+  "gap_after_recovery": 0.72,
+  "key_finding": "Full reset causes PERMANENT quality loss (-0.82 dB after 100 recovery steps). Selective reset nearly fully recovers (-0.10 dB). Collapse severity INCREASES with training maturity (1000 steps: -7.58 dB vs 300 steps: -6.46 dB).",
+  "conclusion": "SUPPORT COLLAPSE CONFIRMED on gsplat CUDA. Training maturity amplifies the effect."
+}

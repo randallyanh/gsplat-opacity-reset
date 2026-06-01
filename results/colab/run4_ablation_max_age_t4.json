@@ -1,0 +1,29 @@
+{
+  "experiment": "max_age_ablation",
+  "backend": "gsplat 1.5.3 CUDA",
+  "gpu": "Tesla T4",
+  "N": 100000,
+  "train_steps": 1000,
+  "recovery_steps": 100,
+  "pre_reset_psnr": 12.47,
+  "birth_step_simulation": "linearly spaced 0..1000 across N=100K (first=oldest, last=youngest)",
+
+  "results": {
+    "no_reset":     {"reset_pct":   0.0, "psnr_after": 12.47, "psnr_rec": 12.49, "drop":  0.00},
+    "age_50":       {"reset_pct":   5.0, "psnr_after": 12.02, "psnr_rec": 12.46, "drop": -0.45},
+    "age_100":      {"reset_pct":  10.0, "psnr_after": 11.59, "psnr_rec": 12.44, "drop": -0.88},
+    "age_200":      {"reset_pct":  20.0, "psnr_after": 10.72, "psnr_rec": 12.37, "drop": -1.76},
+    "age_500":      {"reset_pct":  50.0, "psnr_after":  8.37, "psnr_rec": 12.00, "drop": -4.10},
+    "full_reset":   {"reset_pct": 100.0, "psnr_after":  4.89, "psnr_rec": 11.64, "drop": -7.59},
+    "random_20pct": {"reset_pct":  20.0, "psnr_after": 10.69, "psnr_rec": 12.36, "drop": -1.78}
+  },
+
+  "key_findings": [
+    "PSNR drop scales monotonically with reset fraction: 0% → -0.0, 5% → -0.45, 20% → -1.76, 100% → -7.59",
+    "age_200 and random_20pct have IDENTICAL drop (-1.76 vs -1.78) and recovery (12.37 vs 12.36)",
+    "This means: at this synthetic setup, age-gating and random selection perform similarly when resetting the same fraction",
+    "The key advantage of age-gating is not selection quality but SELECTION CRITERION: in real training, recently-born Gaussians genuinely have weaker support",
+    "Full reset (100%) has PERMANENT residual loss: 11.64 vs 12.47 pre-reset = -0.83 dB unrecoverable",
+    "age_50 (5% reset) nearly fully recovers: 12.46 vs 12.47 = -0.01 dB residual"
+  ]
+}

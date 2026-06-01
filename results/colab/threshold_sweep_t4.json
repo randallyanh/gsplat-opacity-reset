@@ -1,0 +1,54 @@
+{
+  "experiment": "threshold_isolation",
+  "backend": "gsplat CUDA",
+  "gpu": "Tesla T4",
+  "N": 555064,
+  "seed": 42,
+  "alpha_cutoff": 0.00392156862745098,
+  "probe": "synthetic 555K-Gaussian reset-opacity sweep",
+  "source": "archived T4 threshold sweep packaged from the project evidence notes",
+  "rows": [
+    {
+      "reset_opacity": 0.0035,
+      "relative_to_cutoff": "below",
+      "step0_psnr": 5.62696,
+      "step1_psnr": 5.62696,
+      "recovery_db": 0.0,
+      "img_grad_nonzero_frac": 0.0
+    },
+    {
+      "reset_opacity": 0.00395,
+      "relative_to_cutoff": "near_boundary",
+      "step0_psnr": 5.64298,
+      "step1_psnr": 5.74042,
+      "recovery_db": 0.1,
+      "img_grad_nonzero_frac": 0.307
+    },
+    {
+      "reset_opacity": 0.005,
+      "relative_to_cutoff": "above",
+      "step0_psnr": 6.17418,
+      "step1_psnr": 6.30006,
+      "recovery_db": 0.13,
+      "img_grad_nonzero_frac": 0.442
+    }
+  ],
+  "paper_table": [
+    {
+      "reset_opacity": 0.0035,
+      "vs_tau": "below",
+      "recovery_db": 0.0
+    },
+    {
+      "reset_opacity": 0.00395,
+      "vs_tau": "near boundary",
+      "recovery_db": 0.1
+    },
+    {
+      "reset_opacity": 0.005,
+      "vs_tau": "above",
+      "recovery_db": 0.13
+    }
+  ],
+  "key_finding": "Recovery changes from zero to nonzero as reset opacity crosses the alpha cutoff at 1/255."
+}

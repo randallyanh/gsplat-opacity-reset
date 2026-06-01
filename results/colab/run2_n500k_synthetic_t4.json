@@ -1,0 +1,17 @@
+{
+  "experiment": "support_collapse_verification_500k",
+  "backend": "gsplat CUDA",
+  "gpu": "Tesla T4",
+  "N": 500000,
+  "train_steps": 200,
+  "psnr_before": 10.82,
+  "full_reset_psnr_after": 8.13,
+  "full_reset_drop": -2.69,
+  "full_reset_recovery_50": 10.85,
+  "selective_20pct_psnr_after": 10.81,
+  "selective_20pct_drop": -0.01,
+  "selective_20pct_recovery_50": 10.82,
+  "gap_at_reset": 2.68,
+  "gap_after_recovery": -0.03,
+  "note": "Smaller gap than N=100K because fewer training steps per Gaussian. Collapse mechanism confirmed but magnitude depends on training maturity."
+}
