@@ -67,7 +67,9 @@ workflow lives under `.codex/skills/kaggle-training/` and packages GPU runs as:
 Remote runs write JSON artifacts plus `results/kaggle/run_kaggle.log.jsonl`,
 per-experiment JSONL logs, `training_status.json`, and
 `training_run_metadata.json`. Use Kaggle `--run-mode gpucheck` before smoke
-when diagnosing accelerator assignment.
+when diagnosing accelerator assignment. GPU kernel metadata uses
+`docker_image_pinning_type: latest` so kernels first created by CPU envcheck do
+not stay pinned to Kaggle's CPU-only Docker image.
 
 ## Build Paper
 
