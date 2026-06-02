@@ -7,6 +7,45 @@ intentionally excluded.
 
 Every retained claim should map to one table, one artifact, and one command.
 
+## Runtime Evidence Policy
+
+Colab and Kaggle are separate runtimes in this project.
+
+| Runtime | Role | Artifact policy |
+|---|---|---|
+| Colab | Archived paper evidence | Checked in under `results/colab/`; do not overwrite during remote reruns |
+| Kaggle | Reproducibility runtime | Download under ignored `results/kaggle/` run directories with commit-pinned metadata |
+
+Runtime outputs should be consistent, not identical. The required standard is:
+same protocol and metric semantics, same qualitative conclusions, same
+paper-table trends, PSNR/drop/gap metrics within 0.25 dB, exact reset
+percentages, semantic equality for the threshold-sweep JSON, pinned Kaggle
+environment fields, and clean commit-pinned Kaggle run metadata.
+
+Runtime command:
+
+```bash
+python experiments/compare_runtime_artifacts.py --gate runtime
+```
+
+The script writes `results/runtime_consistency_report.json` and exports
+normalized Kaggle values for paper-table review. This gate can pass while still
+warning that multiple Kaggle source revisions were used.
+
+Publication command:
+
+```bash
+python experiments/compare_runtime_artifacts.py --gate publication
+```
+
+The publication gate writes `results/publication_gate_report.json` and fails
+unless all final Kaggle table runs share one clean source revision.
+
+For the planned 2026-06-02 Colab rerun, use
+`docs/evidence/publication-checklist.md`. Raw Colab reruns should be staged
+under ignored `results/colab-reruns/` and promoted into `results/colab/` only
+after acceptance.
+
 ## Mechanism Evidence
 
 | Claim | Artifact | Paper location |

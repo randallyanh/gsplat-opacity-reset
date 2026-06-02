@@ -17,8 +17,16 @@ experiments.
 - `paper/main.tex`: paper source.
 - `experiments/reproduce_gsplat_opacity_reset.py`: CUDA reproduction script for
   the paper-facing controlled probes.
+- `experiments/compare_runtime_artifacts.py`: Colab-vs-Kaggle artifact
+  consistency check and normalized paper-table export.
 - `results/colab/`: checked-in T4 result snapshots used by the paper.
+- `results/runtime_consistency_report.json`: latest checked consistency report
+  comparing archived Colab evidence with downloaded Kaggle reruns.
+- `results/publication_gate_report.json`: latest strict final-table readiness
+  report for Kaggle reruns.
 - `docs/evidence/checklist.md`: claim-to-artifact evidence map.
+- `docs/evidence/publication-checklist.md`: Colab rerun and final release
+  readiness checklist.
 - `docs/evidence/threshold-boundary-notes.md`: notes behind the archived
   threshold-boundary artifact.
 - `docs/notes/draft-notes.md`: scope and table notes.
@@ -32,13 +40,15 @@ pip install -r requirements.txt
 python experiments/reproduce_gsplat_opacity_reset.py
 ```
 
-The script writes `support_collapse_paper_results.json` in the current working
-directory.
+The script writes generated artifacts under ignored `results/local-runs/` by
+default. Use `--result-dir`, `--output`, and `--log-jsonl` to route run outputs.
+Use `--paper-archive-dir` when you need JSON exports matching the checked-in
+`results/colab/` paper layout.
 
 For a small CUDA sanity check before a long run:
 
 ```bash
-python experiments/reproduce_gsplat_opacity_reset.py --only smoke --log-jsonl results/kaggle/smoke.log.jsonl
+python experiments/reproduce_gsplat_opacity_reset.py --only smoke --log-jsonl results/local-runs/smoke.log.jsonl
 ```
 
 For incremental runs, use `--only exp1`, `--only exp2`, `--only exp3`, or
@@ -50,6 +60,10 @@ To emit only the archived Table 3 threshold-sweep artifact:
 ```bash
 python experiments/reproduce_gsplat_opacity_reset.py --only threshold
 ```
+
+The script refuses to write inside the checked-in `results/colab/` archive
+unless `--allow-colab-archive-write` is passed. Stage reruns elsewhere first and
+only use that flag during an intentional promotion.
 
 ## Kaggle Training
 
@@ -73,6 +87,25 @@ machine shape is required for Kaggle to expose NVIDIA devices. Do not run
 smoke/full training until `gpucheck` sees `nvidia-smi` or `/dev/nvidia*` in
 Kaggle logs.
 
+After downloading Kaggle outputs, compare the latest Kaggle reruns against the
+checked-in Colab archive:
+
+```bash
+python experiments/compare_runtime_artifacts.py --gate runtime
+python experiments/compare_runtime_artifacts.py --gate publication
+```
+
+The runtime gate writes `results/runtime_consistency_report.json`. The
+publication gate writes `results/publication_gate_report.json` and additionally
+requires all final Kaggle table runs to come from one clean source revision. Both
+gates treat Colab and Kaggle as separate runtimes: artifacts must preserve the
+same protocol, metric semantics, conclusions, and paper-table trends, but they
+are not expected to be byte-identical or exact floating-point matches.
+
+For a final Colab rerun, follow `docs/evidence/publication-checklist.md`. Stage
+raw rerun outputs under ignored `results/colab-reruns/`, review them, and only
+then promote accepted JSON artifacts into `results/colab/`.
+
 ## Build Paper
 
 ```bash
@@ -83,7 +116,19 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
 
 ## Evidence Status
 
-Tables 1, 2, and 3 are backed by JSON artifacts under `results/colab/`.
+Tables 1, 2, and 3 are backed by checked-in JSON artifacts under
+`results/colab/`. These are the archived paper evidence snapshots and should not
+be overwritten by remote runtime downloads.
+
+Kaggle is maintained as a separate reproducibility runtime. Downloaded Kaggle
+outputs stay under ignored `results/kaggle/` run directories and are compared
+against the archive with `experiments/compare_runtime_artifacts.py`. The runtime
+gate uses a 0.25 dB tolerance for PSNR, drop, and gap metrics, exact reset
+percentages, semantic JSON equality for the threshold sweep, pinned environment
+fields, and clean commit-pinned Kaggle run metadata. The publication gate uses
+the same checks and fails unless all final Kaggle table runs share one source
+commit.
+
 `threshold_sweep_t4.json` is an archived T4 sweep packaged from the project
 evidence notes; rerunning that sweep directly from code is the next robustness
 step for an archival submission.

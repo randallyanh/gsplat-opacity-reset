@@ -1,0 +1,980 @@
+{
+  "environment_checks": [
+    {
+      "actual": "3.12.13",
+      "expected_prefix": "3.12.",
+      "message": "Kaggle Python version matches the project Python 3.12 policy.",
+      "name": "exp1.python",
+      "run_mode": "exp1",
+      "status": "pass"
+    },
+    {
+      "actual": "12.8",
+      "expected": "12.8",
+      "field": "cuda_version",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp1.cuda_version",
+      "run_mode": "exp1",
+      "status": "pass"
+    },
+    {
+      "actual": "Tesla T4",
+      "expected": "Tesla T4",
+      "field": "gpu_name",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp1.gpu_name",
+      "run_mode": "exp1",
+      "status": "pass"
+    },
+    {
+      "actual": "1.5.3",
+      "expected": "1.5.3",
+      "field": "gsplat",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp1.gsplat",
+      "run_mode": "exp1",
+      "status": "pass"
+    },
+    {
+      "actual": "2.10.0+cu128",
+      "expected": "2.10.0+cu128",
+      "field": "pytorch",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp1.pytorch",
+      "run_mode": "exp1",
+      "status": "pass"
+    },
+    {
+      "actual": "3.12.13",
+      "expected_prefix": "3.12.",
+      "message": "Kaggle Python version matches the project Python 3.12 policy.",
+      "name": "exp2.python",
+      "run_mode": "exp2",
+      "status": "pass"
+    },
+    {
+      "actual": "12.8",
+      "expected": "12.8",
+      "field": "cuda_version",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp2.cuda_version",
+      "run_mode": "exp2",
+      "status": "pass"
+    },
+    {
+      "actual": "Tesla T4",
+      "expected": "Tesla T4",
+      "field": "gpu_name",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp2.gpu_name",
+      "run_mode": "exp2",
+      "status": "pass"
+    },
+    {
+      "actual": "1.5.3",
+      "expected": "1.5.3",
+      "field": "gsplat",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp2.gsplat",
+      "run_mode": "exp2",
+      "status": "pass"
+    },
+    {
+      "actual": "2.10.0+cu128",
+      "expected": "2.10.0+cu128",
+      "field": "pytorch",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp2.pytorch",
+      "run_mode": "exp2",
+      "status": "pass"
+    },
+    {
+      "actual": "3.12.13",
+      "expected_prefix": "3.12.",
+      "message": "Kaggle Python version matches the project Python 3.12 policy.",
+      "name": "exp3.python",
+      "run_mode": "exp3",
+      "status": "pass"
+    },
+    {
+      "actual": "12.8",
+      "expected": "12.8",
+      "field": "cuda_version",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp3.cuda_version",
+      "run_mode": "exp3",
+      "status": "pass"
+    },
+    {
+      "actual": "Tesla T4",
+      "expected": "Tesla T4",
+      "field": "gpu_name",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp3.gpu_name",
+      "run_mode": "exp3",
+      "status": "pass"
+    },
+    {
+      "actual": "1.5.3",
+      "expected": "1.5.3",
+      "field": "gsplat",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp3.gsplat",
+      "run_mode": "exp3",
+      "status": "pass"
+    },
+    {
+      "actual": "2.10.0+cu128",
+      "expected": "2.10.0+cu128",
+      "field": "pytorch",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "exp3.pytorch",
+      "run_mode": "exp3",
+      "status": "pass"
+    },
+    {
+      "actual": "3.12.13",
+      "expected_prefix": "3.12.",
+      "message": "Kaggle Python version matches the project Python 3.12 policy.",
+      "name": "ablation.python",
+      "run_mode": "ablation",
+      "status": "pass"
+    },
+    {
+      "actual": "12.8",
+      "expected": "12.8",
+      "field": "cuda_version",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "ablation.cuda_version",
+      "run_mode": "ablation",
+      "status": "pass"
+    },
+    {
+      "actual": "Tesla T4",
+      "expected": "Tesla T4",
+      "field": "gpu_name",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "ablation.gpu_name",
+      "run_mode": "ablation",
+      "status": "pass"
+    },
+    {
+      "actual": "1.5.3",
+      "expected": "1.5.3",
+      "field": "gsplat",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "ablation.gsplat",
+      "run_mode": "ablation",
+      "status": "pass"
+    },
+    {
+      "actual": "2.10.0+cu128",
+      "expected": "2.10.0+cu128",
+      "field": "pytorch",
+      "message": "Kaggle runtime field matches the pinned evidence environment.",
+      "name": "ablation.pytorch",
+      "run_mode": "ablation",
+      "status": "pass"
+    }
+  ],
+  "gate": "runtime",
+  "generated_at": "2026-06-02T00:06:32.756640+00:00",
+  "inputs": {
+    "colab_dir": "results/colab",
+    "kaggle_dir": "results/kaggle",
+    "kaggle_runs": {
+      "ablation": {
+        "environment": {
+          "cuda_version": "12.8",
+          "gpu_name": "Tesla T4",
+          "gsplat": "1.5.3",
+          "python": "3.12.13",
+          "pytorch": "2.10.0+cu128",
+          "timestamp": "2026-06-01T06:32:26.088838+00:00"
+        },
+        "metadata": {
+          "log_path": "results/kaggle/run_kaggle.log.jsonl",
+          "run_mode": "ablation",
+          "source_dataset": "randallyan/gsplat-opacity-reset-source",
+          "source_dirty": false,
+          "source_revision": "8ea32b43bbca0b6f4af359e89a5bd80def757f62",
+          "source_root": "/kaggle/input/datasets/randallyan/gsplat-opacity-reset-source",
+          "training_version": "run-ablation-8ea32b43bbca",
+          "wheelhouse_dataset": "randallyan/gsplat-opacity-reset-wheelhouse",
+          "wheelhouse_path": "/kaggle/input/datasets/randallyan/gsplat-opacity-reset-wheelhouse"
+        },
+        "metadata_path": "results/kaggle/ablation-8ea32b43bbca-v11/results/kaggle/training_run_metadata.json",
+        "result_path": "results/kaggle/ablation-8ea32b43bbca-v11/results/kaggle/ablation_results.json",
+        "run_dir": "results/kaggle/ablation-8ea32b43bbca-v11"
+      },
+      "exp1": {
+        "environment": {
+          "cuda_version": "12.8",
+          "gpu_name": "Tesla T4",
+          "gsplat": "1.5.3",
+          "python": "3.12.13",
+          "pytorch": "2.10.0+cu128",
+          "timestamp": "2026-06-01T06:07:21.900345+00:00"
+        },
+        "metadata": {
+          "log_path": "results/kaggle/run_kaggle.log.jsonl",
+          "run_mode": "exp1",
+          "source_dataset": "randallyan/gsplat-opacity-reset-source",
+          "source_dirty": false,
+          "source_revision": "61fe415af0a6b0ebf4fde6647afd083387b5f698",
+          "source_root": "/kaggle/input/datasets/randallyan/gsplat-opacity-reset-source",
+          "training_version": "run-exp1-61fe415af0a6",
+          "wheelhouse_dataset": "randallyan/gsplat-opacity-reset-wheelhouse",
+          "wheelhouse_path": "/kaggle/input/datasets/randallyan/gsplat-opacity-reset-wheelhouse"
+        },
+        "metadata_path": "results/kaggle/exp1-61fe415af0a6-v8/results/kaggle/training_run_metadata.json",
+        "result_path": "results/kaggle/exp1-61fe415af0a6-v8/results/kaggle/exp1_results.json",
+        "run_dir": "results/kaggle/exp1-61fe415af0a6-v8"
+      },
+      "exp2": {
+        "environment": {
+          "cuda_version": "12.8",
+          "gpu_name": "Tesla T4",
+          "gsplat": "1.5.3",
+          "python": "3.12.13",
+          "pytorch": "2.10.0+cu128",
+          "timestamp": "2026-06-01T06:17:40.629941+00:00"
+        },
+        "metadata": {
+          "log_path": "results/kaggle/run_kaggle.log.jsonl",
+          "run_mode": "exp2",
+          "source_dataset": "randallyan/gsplat-opacity-reset-source",
+          "source_dirty": false,
+          "source_revision": "8ea32b43bbca0b6f4af359e89a5bd80def757f62",
+          "source_root": "/kaggle/input/datasets/randallyan/gsplat-opacity-reset-source",
+          "training_version": "run-exp2-8ea32b43bbca",
+          "wheelhouse_dataset": "randallyan/gsplat-opacity-reset-wheelhouse",
+          "wheelhouse_path": "/kaggle/input/datasets/randallyan/gsplat-opacity-reset-wheelhouse"
+        },
+        "metadata_path": "results/kaggle/exp2-8ea32b43bbca-v9/results/kaggle/training_run_metadata.json",
+        "result_path": "results/kaggle/exp2-8ea32b43bbca-v9/results/kaggle/exp2_results.json",
+        "run_dir": "results/kaggle/exp2-8ea32b43bbca-v9"
+      },
+      "exp3": {
+        "environment": {
+          "cuda_version": "12.8",
+          "gpu_name": "Tesla T4",
+          "gsplat": "1.5.3",
+          "python": "3.12.13",
+          "pytorch": "2.10.0+cu128",
+          "timestamp": "2026-06-01T06:24:24.285842+00:00"
+        },
+        "metadata": {
+          "log_path": "results/kaggle/run_kaggle.log.jsonl",
+          "run_mode": "exp3",
+          "source_dataset": "randallyan/gsplat-opacity-reset-source",
+          "source_dirty": false,
+          "source_revision": "8ea32b43bbca0b6f4af359e89a5bd80def757f62",
+          "source_root": "/kaggle/input/datasets/randallyan/gsplat-opacity-reset-source",
+          "training_version": "run-exp3-8ea32b43bbca",
+          "wheelhouse_dataset": "randallyan/gsplat-opacity-reset-wheelhouse",
+          "wheelhouse_path": "/kaggle/input/datasets/randallyan/gsplat-opacity-reset-wheelhouse"
+        },
+        "metadata_path": "results/kaggle/exp3-8ea32b43bbca-v10/results/kaggle/training_run_metadata.json",
+        "result_path": "results/kaggle/exp3-8ea32b43bbca-v10/results/kaggle/exp3_results.json",
+        "run_dir": "results/kaggle/exp3-8ea32b43bbca-v10"
+      }
+    }
+  },
+  "metric_comparisons": [
+    {
+      "colab": 11.42,
+      "delta": -0.023175972369680053,
+      "group": "table1.exp1",
+      "kaggle": 11.39682402763032,
+      "metric": "pre",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 4.96,
+      "delta": -0.0073636471294378225,
+      "group": "table1.exp1",
+      "kaggle": 4.952636352870562,
+      "metric": "full",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 11.04,
+      "delta": -0.017726954393666006,
+      "group": "table1.exp1",
+      "kaggle": 11.022273045606333,
+      "metric": "full_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 10.72,
+      "delta": 0.0002760857198609301,
+      "group": "table1.exp1",
+      "kaggle": 10.720276085719862,
+      "metric": "sel",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 11.5,
+      "delta": -0.016439291093274022,
+      "group": "table1.exp1",
+      "kaggle": 11.483560708906726,
+      "metric": "sel_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 5.77,
+      "delta": -0.002360267150700146,
+      "group": "table1.exp1",
+      "kaggle": 5.767639732849299,
+      "metric": "gap",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 10.82,
+      "delta": -0.014011014669421229,
+      "group": "table1.exp2",
+      "kaggle": 10.805988985330579,
+      "metric": "pre",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 8.13,
+      "delta": -0.19339594671766314,
+      "group": "table1.exp2",
+      "kaggle": 7.936604053282338,
+      "metric": "full",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 10.85,
+      "delta": -0.014989501508734904,
+      "group": "table1.exp2",
+      "kaggle": 10.835010498491265,
+      "metric": "full_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 10.81,
+      "delta": -0.02762178057368203,
+      "group": "table1.exp2",
+      "kaggle": 10.782378219426318,
+      "metric": "sel",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 10.82,
+      "delta": -0.013200266561355534,
+      "group": "table1.exp2",
+      "kaggle": 10.806799733438645,
+      "metric": "sel_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 2.68,
+      "delta": 0.16577416614398066,
+      "group": "table1.exp2",
+      "kaggle": 2.845774166143981,
+      "metric": "gap",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 12.46,
+      "delta": -0.03219891470822134,
+      "group": "table1.exp3",
+      "kaggle": 12.42780108529178,
+      "metric": "pre",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 4.89,
+      "delta": -0.008651846662989904,
+      "group": "table1.exp3",
+      "kaggle": 4.88134815333701,
+      "metric": "full",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 11.64,
+      "delta": -0.044755801871584566,
+      "group": "table1.exp3",
+      "kaggle": 11.595244198128416,
+      "metric": "full_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 10.72,
+      "delta": -0.04917790544098288,
+      "group": "table1.exp3",
+      "kaggle": 10.670822094559018,
+      "metric": "sel",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 12.36,
+      "delta": -0.02976337003482321,
+      "group": "table1.exp3",
+      "kaggle": 12.330236629965176,
+      "metric": "sel_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 5.83,
+      "delta": -0.04052605877799209,
+      "group": "table1.exp3",
+      "kaggle": 5.789473941222008,
+      "metric": "gap",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": -0.82,
+      "delta": -0.012556887163363561,
+      "group": "table1.exp3",
+      "kaggle": -0.8325568871633635,
+      "metric": "permanent_full",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": -0.1,
+      "delta": 0.002435544673396711,
+      "group": "table1.exp3",
+      "kaggle": -0.0975644553266033,
+      "metric": "permanent_sel",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 0.0,
+      "delta": 0.0,
+      "group": "table2.no_reset",
+      "kaggle": 0.0,
+      "metric": "reset_pct",
+      "status": "pass",
+      "tolerance": 1e-09
+    },
+    {
+      "colab": 12.47,
+      "delta": -0.04037202584182786,
+      "group": "table2.no_reset",
+      "kaggle": 12.429627974158173,
+      "metric": "psnr_after",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 12.49,
+      "delta": -0.044398844451364994,
+      "group": "table2.no_reset",
+      "kaggle": 12.445601155548635,
+      "metric": "psnr_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 0.0,
+      "delta": 0.0,
+      "group": "table2.no_reset",
+      "kaggle": 0.0,
+      "metric": "drop",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 5.0,
+      "delta": 0.0,
+      "group": "table2.age_50",
+      "kaggle": 5.0,
+      "metric": "reset_pct",
+      "status": "pass",
+      "tolerance": 1e-09
+    },
+    {
+      "colab": 12.02,
+      "delta": -0.046657995995714074,
+      "group": "table2.age_50",
+      "kaggle": 11.973342004004285,
+      "metric": "psnr_after",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 12.46,
+      "delta": -0.036817755046170575,
+      "group": "table2.age_50",
+      "kaggle": 12.42318224495383,
+      "metric": "psnr_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": -0.45,
+      "delta": -0.006285970153887266,
+      "group": "table2.age_50",
+      "kaggle": -0.4562859701538873,
+      "metric": "drop",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 10.0,
+      "delta": 0.0,
+      "group": "table2.age_100",
+      "kaggle": 10.0,
+      "metric": "reset_pct",
+      "status": "pass",
+      "tolerance": 1e-09
+    },
+    {
+      "colab": 11.59,
+      "delta": -0.0991172638089246,
+      "group": "table2.age_100",
+      "kaggle": 11.490882736191075,
+      "metric": "psnr_after",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 12.44,
+      "delta": -0.048046987524410056,
+      "group": "table2.age_100",
+      "kaggle": 12.39195301247559,
+      "metric": "psnr_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": -0.88,
+      "delta": -0.05874523796709752,
+      "group": "table2.age_100",
+      "kaggle": -0.9387452379670975,
+      "metric": "drop",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 20.0,
+      "delta": 0.0,
+      "group": "table2.age_200",
+      "kaggle": 20.0,
+      "metric": "reset_pct",
+      "status": "pass",
+      "tolerance": 1e-09
+    },
+    {
+      "colab": 10.72,
+      "delta": -0.08207410833123951,
+      "group": "table2.age_200",
+      "kaggle": 10.637925891668761,
+      "metric": "psnr_after",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 12.37,
+      "delta": -0.04741219561195287,
+      "group": "table2.age_200",
+      "kaggle": 12.322587804388046,
+      "metric": "psnr_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": -1.76,
+      "delta": -0.03170208248941164,
+      "group": "table2.age_200",
+      "kaggle": -1.7917020824894117,
+      "metric": "drop",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 50.0,
+      "delta": 0.0,
+      "group": "table2.age_500",
+      "kaggle": 50.0,
+      "metric": "reset_pct",
+      "status": "pass",
+      "tolerance": 1e-09
+    },
+    {
+      "colab": 8.37,
+      "delta": -0.009205514016782601,
+      "group": "table2.age_500",
+      "kaggle": 8.360794485983217,
+      "metric": "psnr_after",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 12.0,
+      "delta": -0.029040666520215197,
+      "group": "table2.age_500",
+      "kaggle": 11.970959333479785,
+      "metric": "psnr_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": -4.1,
+      "delta": 0.031166511825043486,
+      "group": "table2.age_500",
+      "kaggle": -4.068833488174956,
+      "metric": "drop",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 100.0,
+      "delta": 0.0,
+      "group": "table2.full_reset",
+      "kaggle": 100.0,
+      "metric": "reset_pct",
+      "status": "pass",
+      "tolerance": 1e-09
+    },
+    {
+      "colab": 4.89,
+      "delta": -0.009775199411781621,
+      "group": "table2.full_reset",
+      "kaggle": 4.880224800588218,
+      "metric": "psnr_after",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 11.64,
+      "delta": -0.03957665362611351,
+      "group": "table2.full_reset",
+      "kaggle": 11.600423346373887,
+      "metric": "psnr_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": -7.59,
+      "delta": 0.04059682643004514,
+      "group": "table2.full_reset",
+      "kaggle": -7.549403173569955,
+      "metric": "drop",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 20.0,
+      "delta": 0.0,
+      "group": "table2.random_20pct",
+      "kaggle": 20.0,
+      "metric": "reset_pct",
+      "status": "pass",
+      "tolerance": 1e-09
+    },
+    {
+      "colab": 10.69,
+      "delta": -0.09301734099811121,
+      "group": "table2.random_20pct",
+      "kaggle": 10.596982659001888,
+      "metric": "psnr_after",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": 12.36,
+      "delta": -0.04761911045690859,
+      "group": "table2.random_20pct",
+      "kaggle": 12.31238088954309,
+      "metric": "psnr_rec",
+      "status": "pass",
+      "tolerance": 0.25
+    },
+    {
+      "colab": -1.78,
+      "delta": -0.052645315156284456,
+      "group": "table2.random_20pct",
+      "kaggle": -1.8326453151562845,
+      "metric": "drop",
+      "status": "pass",
+      "tolerance": 0.25
+    }
+  ],
+  "normalized_kaggle_outputs": {
+    "paper_table1": [
+      {
+        "experiment": "exp1",
+        "full_reset_drop_db": -6.444187674759758,
+        "gap_db": 5.767639732849299,
+        "paper_round_1dp": {
+          "full_reset_drop_db": -6.4,
+          "gap_db": 5.8,
+          "selective_reset_drop_db": -0.7
+        },
+        "pre_reset_psnr": 11.39682402763032,
+        "selective_reset_drop_db": -0.6765479419104583
+      },
+      {
+        "experiment": "exp2",
+        "full_reset_drop_db": -2.8693849320482414,
+        "gap_db": 2.845774166143981,
+        "paper_round_1dp": {
+          "full_reset_drop_db": -2.9,
+          "gap_db": 2.8,
+          "selective_reset_drop_db": -0.0
+        },
+        "pre_reset_psnr": 10.805988985330579,
+        "selective_reset_drop_db": -0.02361076590426059
+      },
+      {
+        "experiment": "exp3",
+        "full_reset_drop_db": -7.54645293195477,
+        "gap_db": 5.789473941222008,
+        "paper_round_1dp": {
+          "full_reset_drop_db": -7.5,
+          "gap_db": 5.8,
+          "selective_reset_drop_db": -1.8
+        },
+        "pre_reset_psnr": 12.42780108529178,
+        "selective_reset_drop_db": -1.7569789907327618
+      }
+    ],
+    "paper_table2": [
+      {
+        "drop_db": 0.0,
+        "paper_round_2dp": {
+          "drop_db": 0.0,
+          "psnr_rec": 12.45
+        },
+        "policy": "no_reset",
+        "psnr_rec": 12.445601155548635,
+        "reset_pct": 0.0
+      },
+      {
+        "drop_db": -0.4562859701538873,
+        "paper_round_2dp": {
+          "drop_db": -0.46,
+          "psnr_rec": 12.42
+        },
+        "policy": "age_50",
+        "psnr_rec": 12.42318224495383,
+        "reset_pct": 5.0
+      },
+      {
+        "drop_db": -0.9387452379670975,
+        "paper_round_2dp": {
+          "drop_db": -0.94,
+          "psnr_rec": 12.39
+        },
+        "policy": "age_100",
+        "psnr_rec": 12.39195301247559,
+        "reset_pct": 10.0
+      },
+      {
+        "drop_db": -1.7917020824894117,
+        "paper_round_2dp": {
+          "drop_db": -1.79,
+          "psnr_rec": 12.32
+        },
+        "policy": "age_200",
+        "psnr_rec": 12.322587804388046,
+        "reset_pct": 20.0
+      },
+      {
+        "drop_db": -4.068833488174956,
+        "paper_round_2dp": {
+          "drop_db": -4.07,
+          "psnr_rec": 11.97
+        },
+        "policy": "age_500",
+        "psnr_rec": 11.970959333479785,
+        "reset_pct": 50.0
+      },
+      {
+        "drop_db": -1.8326453151562845,
+        "paper_round_2dp": {
+          "drop_db": -1.83,
+          "psnr_rec": 12.31
+        },
+        "policy": "random_20pct",
+        "psnr_rec": 12.31238088954309,
+        "reset_pct": 20.0
+      },
+      {
+        "drop_db": -7.549403173569955,
+        "paper_round_2dp": {
+          "drop_db": -7.55,
+          "psnr_rec": 11.6
+        },
+        "policy": "full_reset",
+        "psnr_rec": 11.600423346373887,
+        "reset_pct": 100.0
+      }
+    ]
+  },
+  "provenance_checks": [
+    {
+      "expected_training_version": "run-exp1-61fe415af0a6",
+      "metadata_run_mode": "exp1",
+      "run_mode": "exp1",
+      "source_dirty": false,
+      "source_revision": "61fe415af0a6b0ebf4fde6647afd083387b5f698",
+      "status": "pass",
+      "training_version": "run-exp1-61fe415af0a6"
+    },
+    {
+      "expected_training_version": "run-exp2-8ea32b43bbca",
+      "metadata_run_mode": "exp2",
+      "run_mode": "exp2",
+      "source_dirty": false,
+      "source_revision": "8ea32b43bbca0b6f4af359e89a5bd80def757f62",
+      "status": "pass",
+      "training_version": "run-exp2-8ea32b43bbca"
+    },
+    {
+      "expected_training_version": "run-exp3-8ea32b43bbca",
+      "metadata_run_mode": "exp3",
+      "run_mode": "exp3",
+      "source_dirty": false,
+      "source_revision": "8ea32b43bbca0b6f4af359e89a5bd80def757f62",
+      "status": "pass",
+      "training_version": "run-exp3-8ea32b43bbca"
+    },
+    {
+      "expected_training_version": "run-ablation-8ea32b43bbca",
+      "metadata_run_mode": "ablation",
+      "run_mode": "ablation",
+      "source_dirty": false,
+      "source_revision": "8ea32b43bbca0b6f4af359e89a5bd80def757f62",
+      "status": "pass",
+      "training_version": "run-ablation-8ea32b43bbca"
+    }
+  ],
+  "publication_checks": [
+    {
+      "message": "Publication-table Kaggle runs must all come from one source commit.",
+      "name": "single_kaggle_source_revision",
+      "source_revisions": [
+        "61fe415af0a6b0ebf4fde6647afd083387b5f698",
+        "8ea32b43bbca0b6f4af359e89a5bd80def757f62"
+      ],
+      "status": "fail"
+    }
+  ],
+  "runtime_policy": {
+    "colab": "archived checked-in paper evidence",
+    "expected_consistency": [
+      "same experiment protocol and metric semantics",
+      "same qualitative conclusions and paper-table trends",
+      "numeric agreement within the configured tolerance",
+      "not byte-identical and not exact floating-point equality across runtimes"
+    ],
+    "kaggle": "remote reproducibility runtime evidence",
+    "publication_gate": [
+      "all final Kaggle table runs must share one source revision",
+      "Kaggle run metadata must be clean and training-version pinned",
+      "Kaggle runtime fields must match the pinned evidence environment",
+      "runtime consistency checks must pass first"
+    ]
+  },
+  "selected_checks": [
+    {
+      "message": "Kaggle result selected mode matches the run directory mode.",
+      "name": "exp1.selected",
+      "run_mode": "exp1",
+      "selected": "exp1",
+      "status": "pass"
+    },
+    {
+      "message": "Kaggle result selected mode matches the run directory mode.",
+      "name": "exp2.selected",
+      "run_mode": "exp2",
+      "selected": "exp2",
+      "status": "pass"
+    },
+    {
+      "message": "Kaggle result selected mode matches the run directory mode.",
+      "name": "exp3.selected",
+      "run_mode": "exp3",
+      "selected": "exp3",
+      "status": "pass"
+    },
+    {
+      "message": "Kaggle result selected mode matches the run directory mode.",
+      "name": "ablation.selected",
+      "run_mode": "ablation",
+      "selected": "ablation",
+      "status": "pass"
+    }
+  ],
+  "summary": {
+    "environment_checks": 20,
+    "environment_failures": 0,
+    "gate": "runtime",
+    "metric_comparisons": 48,
+    "metric_failures": 0,
+    "overall_status": "pass",
+    "provenance_checks": 4,
+    "provenance_failures": 0,
+    "publication_blocking_failures": 0,
+    "publication_checks": 1,
+    "publication_failures": 1,
+    "selected_checks": 4,
+    "selected_failures": 0,
+    "threshold_comparisons": 4,
+    "threshold_failures": 0,
+    "warnings": [
+      "Kaggle runs use multiple source revisions; review run metadata before using them as a single final table source."
+    ]
+  },
+  "threshold_comparisons": [
+    {
+      "colab_path": "results/colab/threshold_sweep_t4.json",
+      "kaggle_result_path": "results/kaggle/exp1-61fe415af0a6-v8/results/kaggle/exp1_results.json",
+      "run_mode": "exp1",
+      "semantic_equal": true,
+      "status": "pass"
+    },
+    {
+      "colab_path": "results/colab/threshold_sweep_t4.json",
+      "kaggle_result_path": "results/kaggle/exp2-8ea32b43bbca-v9/results/kaggle/exp2_results.json",
+      "run_mode": "exp2",
+      "semantic_equal": true,
+      "status": "pass"
+    },
+    {
+      "colab_path": "results/colab/threshold_sweep_t4.json",
+      "kaggle_result_path": "results/kaggle/exp3-8ea32b43bbca-v10/results/kaggle/exp3_results.json",
+      "run_mode": "exp3",
+      "semantic_equal": true,
+      "status": "pass"
+    },
+    {
+      "colab_path": "results/colab/threshold_sweep_t4.json",
+      "kaggle_result_path": "results/kaggle/ablation-8ea32b43bbca-v11/results/kaggle/ablation_results.json",
+      "run_mode": "ablation",
+      "semantic_equal": true,
+      "status": "pass"
+    }
+  ],
+  "tolerances": {
+    "db_metrics": 0.25,
+    "reset_pct": 1e-09,
+    "threshold_sweep": "semantic JSON equality"
+  }
+}

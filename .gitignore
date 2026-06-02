@@ -7,6 +7,8 @@ __pycache__/
 kaggle/
 dist/kaggle/
 results/kaggle/
+results/local-runs/
+results/colab-reruns/
 
 paper/*.aux
 paper/*.log
