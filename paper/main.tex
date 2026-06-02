@@ -1,14 +1,10 @@
-\documentclass[10pt,twocolumn,letterpaper]{article}
+\documentclass[runningheads]{llncs}
 
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{lmodern}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
-\usepackage{hyperref}
-\usepackage{xcolor}
 \usepackage{listings}
-\usepackage[margin=1in]{geometry}
+\usepackage{url}
 
 \lstset{
   basicstyle=\small\ttfamily,
@@ -18,18 +14,24 @@
   columns=fullflexible,
 }
 
+\newcommand{\DefaultStrategy}{\texttt{Default\allowbreak Strategy}}
+
 \title{Opacity Reset Can Deadlock gsplat's Default Strategy:\\Gradient Collapse at the $1/255$ Alpha Cutoff}
+\titlerunning{Opacity Reset Can Deadlock gsplat}
 
-\author{Hua Yan}
-
-\date{}
+\author{Anonymized Authors}
+\authorrunning{Anonymized Author et al.}
+\institute{Anonymized Affiliations\\
+    \email{email@anonymized.com}}
 
 \begin{document}
 \maketitle
 
 % ════════════════════════════════════════════════════════════════
 \begin{abstract}
-The standard 3D Gaussian Splatting (3DGS) training recipe periodically resets all Gaussian opacities to a low value; gsplat's \texttt{DefaultStrategy} inherits this reset-based design. We show that, in gsplat's CUDA rasterizer, this practice can cause a \textbf{gradient deadlock}: once the effective per-pixel alpha falls below the renderer's hard cutoff ($1/255$), the backward pass supplies no image-driven opacity gradient for the affected contribution. We call this failure mode \emph{support collapse}. It is silent---training continues without error---and affected Gaussians are difficult to recover under standard optimization. Controlled gsplat CUDA probes show immediate post-reset PSNR drops of 2.7--7.6\,dB under full reset, while resetting only the youngest 20\% limits the drop to 0.0--1.8\,dB. A reset-opacity sweep isolates the transition at the $1/255$ threshold. The fix is a minimal policy change: track each Gaussian's birth step and reset only recently-born Gaussians. The claim is specific to reset-based strategies; gsplat's \texttt{MCMCStrategy}, which relocates low-opacity Gaussians rather than globally resetting opacities, requires separate evaluation.
+The standard 3D Gaussian Splatting (3DGS) training recipe periodically resets all Gaussian opacities to a low value; gsplat's \DefaultStrategy{} inherits this reset-based design. We show that, in gsplat's CUDA rasterizer, this practice can cause a \textbf{gradient deadlock}: once the effective per-pixel alpha falls below the renderer's hard cutoff ($1/255$), the backward pass supplies no image-driven opacity gradient for the affected contribution. We call this failure mode \emph{support collapse}. It is silent---training continues without error---and affected Gaussians are difficult to recover under standard optimization. Controlled gsplat CUDA probes show immediate post-reset PSNR drops of 2.7--7.6\,dB under full reset, while resetting only the youngest 20\% limits the drop to 0.0--1.8\,dB. A reset-opacity sweep isolates the transition at the $1/255$ threshold. The fix is a minimal policy change: track each Gaussian's birth step and reset only recently-born Gaussians. The claim is specific to reset-based strategies; gsplat's \texttt{MCMCStrategy}, which relocates low-opacity Gaussians rather than globally resetting opacities, requires separate evaluation.
+
+\keywords{Gaussian splatting \and Differentiable rendering \and Training stability \and Opacity reset}
 \end{abstract}
 
 % ════════════════════════════════════════════════════════════════
@@ -43,7 +45,7 @@ if (alpha < 1.0f / 255.0f) continue;
 
 It is a sensible optimization: a contribution smaller than one bit in an 8-bit framebuffer is invisible. In inference, this is free. In training, it creates a \textbf{hard boundary in the gradient graph} that interacts catastrophically with a widely-used component of the standard 3DGS training recipe: periodic opacity reset.
 
-The standard training recipe~\cite{kerbl2023}, as represented by gsplat's reset-based \texttt{DefaultStrategy}, resets \emph{all} Gaussian opacities to 0.01 every 3{,}000 steps. This is intended as a regularizer. At moderate scale, it works as designed. But as Gaussian count grows and individual Gaussians build mature spatial support, the combination of low post-reset opacity and projection footprint falloff can push effective per-pixel alpha below $1/255$, silencing the image-driven opacity gradient for those contributions. We call this \textbf{support collapse}. In controlled gsplat CUDA probes, the severity depends on training maturity, support radius, and $N$ jointly.
+The standard training recipe~\cite{kerbl2023} resets \emph{all} Gaussian opacities to 0.01 every 3{,}000 steps; gsplat's reset-based \DefaultStrategy{} follows this design. This is intended as a regularizer. At moderate scale, it works as designed. But as Gaussian count grows and individual Gaussians build mature spatial support, the combination of low post-reset opacity and projection footprint falloff can push effective per-pixel alpha below $1/255$, silencing the image-driven opacity gradient for those contributions. We call this \textbf{support collapse}. In controlled gsplat CUDA probes, the severity depends on training maturity, support radius, and $N$ jointly.
 
 This is not a subtle effect in controlled probes. On gsplat's CUDA rasterizer, the immediate gap between full reset and our fix exceeds \textbf{5.8\,dB}. In the mature 100K-Gaussian probe, full reset leaves a residual 0.8\,dB quality loss after 100 recovery steps, while youngest-20\% reset recovers to within 0.1\,dB of the pre-reset baseline.
 
@@ -92,7 +94,7 @@ At pixels beyond ${\sim}1.37\sigma$ from the projected mean, $\alpha_{i,p}$ drop
 % ════════════════════════════════════════════════════════════════
 \section{Age-Gated Selective Reset}
 
-Our proposed change targets reset-based strategies such as gsplat's \texttt{DefaultStrategy}. It is not intended as a replacement for MCMC-style densification, which handles low-opacity Gaussians through relocation and sampling rather than through periodic global opacity reset.
+Our proposed change targets reset-based strategies such as gsplat's \DefaultStrategy{}. It is not intended as a replacement for MCMC-style densification, which handles low-opacity Gaussians through relocation and sampling rather than through periodic global opacity reset.
 
 Given per-Gaussian \texttt{birth\_step} metadata (updated on split/clone), the policy change is one conditional:
 
@@ -109,7 +111,7 @@ if age > max_age:
 
 \subsection{gsplat CUDA Controlled Probes}
 
-We verify the mechanism on gsplat's CUDA rasterizer (Tesla T4) using synthetic scenes with controlled $N$ and training maturity. Protocol: train $N$ Gaussians to fit a random target, snapshot state, apply a \texttt{DefaultStrategy}-style opacity reset, measure PSNR and recovery.
+We verify the mechanism on gsplat's CUDA rasterizer (Tesla T4) using synthetic scenes with controlled $N$ and training maturity. Protocol: train $N$ Gaussians to fit a random target, snapshot state, apply a \DefaultStrategy{}-style opacity reset, measure PSNR and recovery.
 
 \begin{table}[t]
 \centering
@@ -175,13 +177,11 @@ Reset Opacity & vs.\ $\tau$ & Recovery (8 steps) \\
 
 The transition from zero to nonzero recovery aligns with $\tau = 1/255 \approx 0.00392$.
 
-\paragraph{Artifacts.} CUDA result JSONs are stored under
-\path{results/colab/}: \path{environment_and_full_record.json} for
-Table~\ref{tab:cuda} and \path{run4_ablation_max_age_t4.json} for
-Table~\ref{tab:ablation}; \path{threshold_sweep_t4.json} stores
-Table~\ref{tab:threshold}. The reproduction script is
-\path{experiments/reproduce_gsplat_opacity_reset.py}; it writes
-\path{support_collapse_paper_results.json}.
+\paragraph{Artifacts.} A paper artifact manifest maps
+Tables~\ref{tab:cuda}--\ref{tab:threshold} to the checked-in Colab JSON
+evidence and records SHA-256 digests for each evidence file. The same manifest
+lists the reproduction entrypoint, runtime metadata, and archived threshold
+sweep.
 
 % ════════════════════════════════════════════════════════════════
 \section{Analysis}
@@ -197,13 +197,11 @@ Table~\ref{tab:threshold}. The reproduction script is
 % ════════════════════════════════════════════════════════════════
 \section{Conclusion}
 
-Periodic opacity reset can create a gradient deadlock in gsplat's reset-based default training path. The renderer's alpha cutoff---a standard rendering optimization---becomes a learning barrier when reset pushes effective alpha below it. Age-gated selective reset avoids the controlled-probe collapse with a minimal policy change. As 3DGS training scales to larger scenes and higher Gaussian counts, this failure mode is worth auditing in any pipeline that combines hard alpha gating with unconditional opacity reset.
+Periodic opacity reset can create a gradient deadlock in gsplat's reset-based default training path. The renderer's alpha cutoff is a standard rendering optimization, but it becomes a learning barrier when reset pushes effective alpha below it. Age-gated selective reset avoids the controlled-probe collapse with a minimal policy change. As 3DGS training scales to larger scenes and higher Gaussian counts, this failure mode is worth auditing in any pipeline that combines hard alpha gating with unconditional opacity reset.
 
 % ════════════════════════════════════════════════════════════════
-\paragraph{Code and artifacts.} \url{https://github.com/randallyanh/gsplat-opacity-reset}
+\paragraph{Code and artifacts.} The reproduction entrypoint and JSON evidence are identified by relative paths in the experiments section. Public code and artifacts will be released after completion of double-blind review.
 
-{\small
-\bibliographystyle{plain}
 \begin{thebibliography}{2}
 
 \bibitem{kerbl2023}
@@ -217,6 +215,5 @@ V.~Ye et~al.
 \newblock \emph{arXiv:2409.06765}, 2024.
 
 \end{thebibliography}
-}
 
 \end{document}

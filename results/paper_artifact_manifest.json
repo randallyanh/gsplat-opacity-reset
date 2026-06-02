@@ -1,0 +1,123 @@
+{
+  "evidence_files": [
+    {
+      "bytes": 4242,
+      "path": "results/colab/environment_and_full_record.json",
+      "role": "environment and combined Table 1 record",
+      "sha256": "e1c28338b5d653691d64c60020347ddc6a8cf033cec32cd9d45818582e10350e",
+      "tables": [
+        "Table 1"
+      ]
+    },
+    {
+      "bytes": 1491,
+      "path": "results/colab/run1_n100k_synthetic_t4.json",
+      "role": "Exp 1 paper evidence",
+      "sha256": "e111b3e471501755b9590d85d4ec27aba2e014d64e8ae8e7488db807a19c9667",
+      "tables": [
+        "Table 1"
+      ]
+    },
+    {
+      "bytes": 583,
+      "path": "results/colab/run2_n500k_synthetic_t4.json",
+      "role": "Exp 2 paper evidence",
+      "sha256": "59a380b1fb1ea12eb77ff2073a27e90c9062aec9c99be80f917a079ceefd1f78",
+      "tables": [
+        "Table 1"
+      ]
+    },
+    {
+      "bytes": 875,
+      "path": "results/colab/run3_n100k_mature_t4.json",
+      "role": "Exp 3 paper evidence",
+      "sha256": "bfb17cb550f1ef0c350af0e131925f500c0f7af8b113cfcb3eeaf72e6bec8e0e",
+      "tables": [
+        "Table 1"
+      ]
+    },
+    {
+      "bytes": 1696,
+      "path": "results/colab/run4_ablation_max_age_t4.json",
+      "role": "reset-fraction ablation paper evidence",
+      "sha256": "2357b34254e32ff65354784aeed79542d425892414d48db5c00683aab713f2e1",
+      "tables": [
+        "Table 2"
+      ]
+    },
+    {
+      "bytes": 1353,
+      "path": "results/colab/threshold_sweep_t4.json",
+      "role": "threshold isolation paper evidence",
+      "sha256": "dd35083985a22f17e07d149328300f57379d428facf8b5d5bae7abb8b0de0f45",
+      "tables": [
+        "Table 3"
+      ]
+    }
+  ],
+  "generated_at_utc": "2026-06-02T01:37:47.718939+00:00",
+  "paper": {
+    "bytes": 254711,
+    "path": "paper/main.pdf",
+    "role": "rebuilt MICCAI/LNCS review PDF",
+    "sha256": "47735f4d6eeca150f7036068faeb389903234600769150154e6c6ad708b1731c",
+    "tables": []
+  },
+  "project": "gsplat-opacity-reset",
+  "repository": {
+    "head_revision": "d32ffa7047abd1454671f8734aa6e19b80871f3f",
+    "head_revision_short": "d32ffa7047ab",
+    "source_dirty": true,
+    "status_short": [
+      "M paper/main.tex",
+      "?? paper/llncs.cls",
+      "?? paper/splncs04.bst",
+      "?? results/paper_artifact_manifest.json"
+    ]
+  },
+  "runtime_audit": {
+    "colab_l4_rerun_dir": "results/colab-reruns/2026-06-02-1e5b6c667e2d",
+    "colab_l4_result_sha256": "a9b1960d0c7b462e0463483681d3e2797b0248ce8e883acb79bf50347ace24bf",
+    "colab_l4_source_revision": "1e5b6c667e2df5c0108e02932c3d8d8cc013b8b2",
+    "colab_l4_status": "complete",
+    "publication_gate": "not required for current paper source policy; Kaggle final-table provenance currently fails single-source-revision check",
+    "runtime_gate": "pass"
+  },
+  "schema_version": 1,
+  "submission_policy": {
+    "colab_l4_rerun_role": "current-commit audit evidence only; not promoted to paper tables",
+    "kaggle_role": "independent reproducibility runtime; not final paper table source",
+    "paper_evidence_runtime": "Colab Tesla T4 archive",
+    "primary_evidence_dir": "results/colab"
+  },
+  "table_mapping": {
+    "Table 1": [
+      "results/colab/environment_and_full_record.json",
+      "results/colab/run1_n100k_synthetic_t4.json",
+      "results/colab/run2_n500k_synthetic_t4.json",
+      "results/colab/run3_n100k_mature_t4.json"
+    ],
+    "Table 2": [
+      "results/colab/run4_ablation_max_age_t4.json"
+    ],
+    "Table 3": [
+      "results/colab/threshold_sweep_t4.json"
+    ]
+  },
+  "template_files": [
+    {
+      "bytes": 43402,
+      "path": "paper/llncs.cls",
+      "role": "official MICCAI 2026 LaTeX template class",
+      "sha256": "a3cfe775b394aba8db8fbb54b8920ecbb12f4532cf787cd6d9b04712f58d0d1a",
+      "tables": []
+    },
+    {
+      "bytes": 32146,
+      "path": "paper/splncs04.bst",
+      "role": "official LNCS bibliography style",
+      "sha256": "f36c3a17e5304a692706359aafa9de709395a085e579eb47c027095aeaa35174",
+      "tables": []
+    }
+  ]
+}
