@@ -214,7 +214,9 @@ def main() -> int:
     sidecar.write_text(f"{zip_hash}  {out_zip.name}\n")
     print(f"\nwrote {args.out}  ({out_zip.stat().st_size} bytes)")
     print(f"zip sha256: {zip_hash}")
-    print(f"sidecar:    {sidecar.relative_to(repo)}  (verify: shasum -a 256 -c)")
+    sidecar_rel = sidecar.relative_to(repo)
+    verify_cmd = f"(cd {sidecar.parent.relative_to(repo)} && shasum -a 256 -c {sidecar.name})"
+    print(f"sidecar:    {sidecar_rel}  (verify: {verify_cmd})")
     for rel in sorted(member_paths):
         print(f"  + {rel}")
     return 0
