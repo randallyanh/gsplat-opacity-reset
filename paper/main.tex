@@ -16,8 +16,8 @@
 
 \newcommand{\DefaultStrategy}{\texttt{Default\allowbreak Strategy}}
 
-\title{Opacity Reset Can Deadlock gsplat's Default Strategy:\\Gradient Collapse at the $1/255$ Alpha Cutoff}
-\titlerunning{Opacity Reset Can Deadlock gsplat}
+\title{Training Stability of 3D Gaussian Splatting under Hard Alpha Gating}
+\titlerunning{Training Stability of 3DGS under Hard Alpha Gating}
 
 \author{Anonymized Authors}
 \authorrunning{Anonymized Author et al.}
@@ -29,15 +29,15 @@
 
 % ════════════════════════════════════════════════════════════════
 \begin{abstract}
-3D Gaussian Splatting (3DGS) is increasingly used for surgical and endoscopic scene reconstruction, where high-fidelity novel-view synthesis and fast visualization are central to downstream medical simulation pipelines. The standard 3DGS training recipe periodically resets all Gaussian opacities to a low value; gsplat's \DefaultStrategy{} inherits this reset-based design. We show that, in gsplat's CUDA rasterizer, this practice can cause a \textbf{gradient deadlock}: once the effective per-pixel alpha falls below the renderer's hard cutoff ($1/255$), the backward pass supplies no image-driven opacity gradient for the affected contribution. We call this failure mode \emph{support collapse}. It is silent---training continues without error---and affected Gaussians are difficult to recover under standard optimization. Controlled gsplat CUDA probes show immediate post-reset PSNR drops of 2.7--7.6\,dB under full reset, while resetting only the youngest 20\% limits the drop to 0.0--1.8\,dB. A reset-opacity sweep isolates the transition at the $1/255$ threshold. The fix is a minimal policy change: track each Gaussian's birth step and reset only recently-born Gaussians. The claim is specific to reset-based strategies; gsplat's \texttt{MCMCStrategy}, which relocates low-opacity Gaussians rather than globally resetting opacities, requires separate evaluation.
+3D Gaussian Splatting (3DGS) is a widely used differentiable renderer for real-time novel-view synthesis, now being adopted in demanding settings such as surgical and endoscopic scene reconstruction. The standard 3DGS training recipe periodically resets all Gaussian opacities to a low value; gsplat's \DefaultStrategy{} inherits this reset-based design. We show that, in gsplat's CUDA rasterizer, this practice can cause a \textbf{gradient deadlock}: once the effective per-pixel alpha falls below the renderer's hard cutoff ($1/255$), the backward pass supplies no image-driven opacity gradient for the affected contribution. We call this failure mode \emph{support collapse}. It is silent---training continues without error---and affected Gaussians are difficult to recover under standard optimization. Controlled gsplat CUDA probes show immediate post-reset PSNR drops of 2.7--7.6\,dB under full reset, while resetting only the youngest 20\% limits the drop to 0.0--1.8\,dB. A reset-opacity sweep isolates the transition at the $1/255$ threshold. The fix is a minimal policy change: track each Gaussian's birth step and reset only recently-born Gaussians. The claim is specific to reset-based strategies; gsplat's \texttt{MCMCStrategy}, which relocates low-opacity Gaussians rather than globally resetting opacities, requires separate evaluation.
 
-\keywords{Gaussian splatting \and Endoscopic scene reconstruction \and Differentiable rendering \and Training stability \and Opacity reset}
+\keywords{Gaussian splatting \and Differentiable rendering \and Training stability \and Opacity reset \and Endoscopic scene reconstruction}
 \end{abstract}
 
 % ════════════════════════════════════════════════════════════════
 \section{Introduction}
 
-3D Gaussian Splatting (3DGS) has begun to move from general scene rendering into medical reconstruction and synthesis pipelines. Recent endoscopic systems use Gaussian representations for real-time deformable tissue reconstruction, novel-view synthesis, camera tracking, and online visualization in surgical scenes~\cite{endogaussian2024,endogslam2024}. These applications make renderer-level training stability a medical-imaging concern: a silent optimization failure can degrade a reconstructed surgical field or simulated view without producing an obvious runtime error.
+3D Gaussian Splatting (3DGS) has become a standard differentiable renderer for real-time, high-fidelity novel-view synthesis, and its training procedure is inherited by a growing range of downstream systems---making renderer-level training stability broadly important. It matters acutely in high-stakes settings: recent endoscopic systems, for instance, use Gaussian representations for real-time deformable tissue reconstruction, novel-view synthesis, camera tracking, and online visualization in surgical scenes~\cite{endogaussian2024,endogslam2024}, where a silent optimization failure can degrade a reconstruction without an obvious runtime error.
 
 gsplat's CUDA rasterizer contains this line:
 
