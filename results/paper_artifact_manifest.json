@@ -55,18 +55,18 @@
       ]
     }
   ],
-  "generated_at_utc": "2026-06-02T01:47:08.414236+00:00",
+  "generated_at_utc": "2026-06-02T04:07:02+00:00",
   "paper": {
-    "bytes": 254711,
+    "bytes": 258465,
     "path": "paper/main.pdf",
     "role": "rebuilt MICCAI/LNCS review PDF",
-    "sha256": "47735f4d6eeca150f7036068faeb389903234600769150154e6c6ad708b1731c",
+    "sha256": "4420afe864629ea51c26778b3c8e6c80eee74813e50a92237421a2f259ab9cf4",
     "tables": []
   },
   "project": "gsplat-opacity-reset",
   "repository": {
-    "head_revision": "861b45ae1e5527d76eadc9279ece2c58a05f77ff",
-    "head_revision_short": "861b45ae1e55",
+    "head_revision": "751eb2b70841dc056b0cc5eaa89caa647c73555d",
+    "head_revision_short": "751eb2b70841",
     "source_dirty": false,
     "status_short": []
   },
