@@ -6,6 +6,7 @@ __pycache__/
 .kaggle/
 kaggle/
 dist/kaggle/
+dist/submission/
 results/kaggle/
 results/local-runs/
 results/colab-reruns/
