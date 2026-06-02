@@ -29,13 +29,15 @@
 
 % ════════════════════════════════════════════════════════════════
 \begin{abstract}
-The standard 3D Gaussian Splatting (3DGS) training recipe periodically resets all Gaussian opacities to a low value; gsplat's \DefaultStrategy{} inherits this reset-based design. We show that, in gsplat's CUDA rasterizer, this practice can cause a \textbf{gradient deadlock}: once the effective per-pixel alpha falls below the renderer's hard cutoff ($1/255$), the backward pass supplies no image-driven opacity gradient for the affected contribution. We call this failure mode \emph{support collapse}. It is silent---training continues without error---and affected Gaussians are difficult to recover under standard optimization. Controlled gsplat CUDA probes show immediate post-reset PSNR drops of 2.7--7.6\,dB under full reset, while resetting only the youngest 20\% limits the drop to 0.0--1.8\,dB. A reset-opacity sweep isolates the transition at the $1/255$ threshold. The fix is a minimal policy change: track each Gaussian's birth step and reset only recently-born Gaussians. The claim is specific to reset-based strategies; gsplat's \texttt{MCMCStrategy}, which relocates low-opacity Gaussians rather than globally resetting opacities, requires separate evaluation.
+3D Gaussian Splatting (3DGS) is increasingly used for surgical and endoscopic scene reconstruction, where high-fidelity novel-view synthesis and fast visualization are central to downstream medical simulation pipelines. The standard 3DGS training recipe periodically resets all Gaussian opacities to a low value; gsplat's \DefaultStrategy{} inherits this reset-based design. We show that, in gsplat's CUDA rasterizer, this practice can cause a \textbf{gradient deadlock}: once the effective per-pixel alpha falls below the renderer's hard cutoff ($1/255$), the backward pass supplies no image-driven opacity gradient for the affected contribution. We call this failure mode \emph{support collapse}. It is silent---training continues without error---and affected Gaussians are difficult to recover under standard optimization. Controlled gsplat CUDA probes show immediate post-reset PSNR drops of 2.7--7.6\,dB under full reset, while resetting only the youngest 20\% limits the drop to 0.0--1.8\,dB. A reset-opacity sweep isolates the transition at the $1/255$ threshold. The fix is a minimal policy change: track each Gaussian's birth step and reset only recently-born Gaussians. The claim is specific to reset-based strategies; gsplat's \texttt{MCMCStrategy}, which relocates low-opacity Gaussians rather than globally resetting opacities, requires separate evaluation.
 
-\keywords{Gaussian splatting \and Differentiable rendering \and Training stability \and Opacity reset}
+\keywords{Gaussian splatting \and Endoscopic scene reconstruction \and Differentiable rendering \and Training stability \and Opacity reset}
 \end{abstract}
 
 % ════════════════════════════════════════════════════════════════
 \section{Introduction}
+
+3D Gaussian Splatting (3DGS) has begun to move from general scene rendering into medical reconstruction and synthesis pipelines. Recent endoscopic systems use Gaussian representations for real-time deformable tissue reconstruction, novel-view synthesis, camera tracking, and online visualization in surgical scenes~\cite{endogaussian2024,endogslam2024}. These applications make renderer-level training stability a medical-imaging concern: a silent optimization failure can degrade a reconstructed surgical field or simulated view without producing an obvious runtime error.
 
 gsplat's CUDA rasterizer contains this line:
 
@@ -57,6 +59,7 @@ The fix is straightforward: track each Gaussian's birth step, and reset only tho
 \item We show the implementation-level deadlock: when all contributing pixels for a Gaussian fall below $\tau = 1/255$, the skipped contributions supply no image-driven opacity gradient.
 \item We reproduce the failure on gsplat CUDA with controlled $N$, maturity, reset-fraction, and threshold-isolation probes.
 \item We fix it with age-gated selective reset: a minimal policy change that yields large gains in controlled CUDA probes.
+\item We discuss why reset-based 3DGS training should be audited before deployment in surgical and endoscopic synthesis pipelines.
 \end{itemize}
 
 % ════════════════════════════════════════════════════════════════
@@ -194,20 +197,32 @@ sweep.
 
 \paragraph{Implementation scope.} This paper demonstrates the failure on gsplat CUDA~\cite{gsplat2024}. The mechanism is not CUDA-specific in principle: any implementation that drops below-threshold alpha contributions during training and combines that hard gate with unconditional opacity reset is susceptible. Establishing the magnitude on full training pipelines and MCMC-style strategies is left to future work.
 
+\paragraph{Medical-synthesis scope.} Our experiments are controlled CUDA probes, not clinical validations. They do not claim that an existing endoscopic 3DGS system has already failed in this way. The relevance is preventive: surgical and endoscopic 3DGS pipelines rely on stable differentiable rendering to reconstruct or synthesize views of deformable tissue~\cite{endogaussian2024,endogslam2024}. A silent post-reset gradient deadlock is therefore a failure mode worth screening before such pipelines are used for medical simulation, navigation research, or data generation.
+
 % ════════════════════════════════════════════════════════════════
 \section{Conclusion}
 
-Periodic opacity reset can create a gradient deadlock in gsplat's reset-based default training path. The renderer's alpha cutoff is a standard rendering optimization, but it becomes a learning barrier when reset pushes effective alpha below it. Age-gated selective reset avoids the controlled-probe collapse with a minimal policy change. As 3DGS training scales to larger scenes and higher Gaussian counts, this failure mode is worth auditing in any pipeline that combines hard alpha gating with unconditional opacity reset.
+Periodic opacity reset can create a gradient deadlock in gsplat's reset-based default training path. The renderer's alpha cutoff is a standard rendering optimization, but it becomes a learning barrier when reset pushes effective alpha below it. Age-gated selective reset avoids the controlled-probe collapse with a minimal policy change. As 3DGS training scales to larger surgical, endoscopic, and general scenes, this failure mode is worth auditing in any pipeline that combines hard alpha gating with unconditional opacity reset.
 
 % ════════════════════════════════════════════════════════════════
 \paragraph{Code and artifacts.} The reproduction entrypoint and JSON evidence are identified by relative paths in the experiments section. Public code and artifacts will be released after completion of double-blind review.
 
-\begin{thebibliography}{2}
+\begin{thebibliography}{4}
 
 \bibitem{kerbl2023}
 B.~Kerbl, G.~Kopanas, T.~Leimkuhler, G.~Drettakis.
 \newblock 3D Gaussian Splatting for Real-Time Radiance Field Rendering.
 \newblock \emph{SIGGRAPH}, 2023.
+
+\bibitem{endogaussian2024}
+Y.~Liu, C.~Li, C.~Yang, Y.~Yuan.
+\newblock EndoGaussian: Real-time Gaussian Splatting for Dynamic Endoscopic Scene Reconstruction.
+\newblock \emph{arXiv:2401.12561}, 2024.
+
+\bibitem{endogslam2024}
+K.~Wang, C.~Yang, Y.~Wang, S.~Li, Y.~Wang, Q.~Dou, X.~Yang, W.~Shen.
+\newblock EndoGSLAM: Real-Time Dense Reconstruction and Tracking in Endoscopic Surgeries using Gaussian Splatting.
+\newblock \emph{MICCAI}, 2024.
 
 \bibitem{gsplat2024}
 V.~Ye et~al.
