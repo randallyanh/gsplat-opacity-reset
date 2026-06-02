@@ -55,7 +55,7 @@
       ]
     }
   ],
-  "generated_at_utc": "2026-06-02T01:37:47.718939+00:00",
+  "generated_at_utc": "2026-06-02T01:47:08.414236+00:00",
   "paper": {
     "bytes": 254711,
     "path": "paper/main.pdf",
@@ -65,15 +65,10 @@
   },
   "project": "gsplat-opacity-reset",
   "repository": {
-    "head_revision": "d32ffa7047abd1454671f8734aa6e19b80871f3f",
-    "head_revision_short": "d32ffa7047ab",
-    "source_dirty": true,
-    "status_short": [
-      "M paper/main.tex",
-      "?? paper/llncs.cls",
-      "?? paper/splncs04.bst",
-      "?? results/paper_artifact_manifest.json"
-    ]
+    "head_revision": "861b45ae1e5527d76eadc9279ece2c58a05f77ff",
+    "head_revision_short": "861b45ae1e55",
+    "source_dirty": false,
+    "status_short": []
   },
   "runtime_audit": {
     "colab_l4_rerun_dir": "results/colab-reruns/2026-06-02-1e5b6c667e2d",
