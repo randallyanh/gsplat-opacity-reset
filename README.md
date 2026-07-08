@@ -3,6 +3,11 @@
 Standalone paper and reproduction package for the gsplat opacity-reset support
 collapse note.
 
+## Upstream
+
+- Mechanism report: [nerfstudio-project/gsplat#1011](https://github.com/nerfstudio-project/gsplat/issues/1011)
+- Proposed fix (age-gated reset, `DefaultStrategy.reset_max_age`): [PR #1012](https://github.com/nerfstudio-project/gsplat/pull/1012)
+
 ## Scope
 
 This project is intentionally limited to the gsplat CUDA, reset-based training

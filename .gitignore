@@ -17,3 +17,6 @@ paper/*.out
 paper/*.pdf
 
 support_collapse_paper_results.json
+
+.codex/
+dist/
