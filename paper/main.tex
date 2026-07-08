@@ -19,17 +19,17 @@
 \title{Training Stability of 3D Gaussian Splatting under Hard Alpha Gating}
 \titlerunning{Training Stability of 3DGS under Hard Alpha Gating}
 
-\author{Anonymized Authors}
-\authorrunning{Anonymized Author et al.}
-\institute{Anonymized Affiliations\\
-    \email{email@anonymized.com}}
+\author{Randall Yan}
+\authorrunning{R. Yan}
+\institute{Independent Researcher\\
+    \email{randall.yanh@gmail.com}}
 
 \begin{document}
 \maketitle
 
 % ════════════════════════════════════════════════════════════════
 \begin{abstract}
-3D Gaussian Splatting (3DGS) is a widely used differentiable renderer for real-time novel-view synthesis, now being adopted in demanding settings such as surgical and endoscopic scene reconstruction. The standard 3DGS training recipe periodically resets all Gaussian opacities to a low value; gsplat's \DefaultStrategy{} inherits this reset-based design. We show that, in gsplat's CUDA rasterizer, this practice can cause a \textbf{gradient deadlock}: once the effective per-pixel alpha falls below the renderer's hard cutoff ($1/255$), the backward pass supplies no image-driven opacity gradient for the affected contribution. We call this failure mode \emph{support collapse}. It is silent---training continues without error---and affected Gaussians are difficult to recover under standard optimization. Controlled gsplat CUDA probes show immediate post-reset PSNR drops of 2.7--7.6\,dB under full reset, while resetting only the youngest 20\% limits the drop to 0.0--1.8\,dB. A reset-opacity sweep isolates the transition at the $1/255$ threshold. The fix is a minimal policy change: track each Gaussian's birth step and reset only recently-born Gaussians. The claim is specific to reset-based strategies; gsplat's \texttt{MCMCStrategy}, which relocates low-opacity Gaussians rather than globally resetting opacities, requires separate evaluation.
+3D Gaussian Splatting (3DGS) is a widely used differentiable renderer for real-time novel-view synthesis, now being adopted in demanding settings such as surgical and endoscopic scene reconstruction. The standard 3DGS training recipe periodically resets all Gaussian opacities to a low value; gsplat's \DefaultStrategy{} inherits this reset-based design. We show that, in gsplat's CUDA rasterizer, this practice can cause a \textbf{gradient deadlock}: once the effective per-pixel alpha falls below the renderer's hard cutoff ($1/255$), the backward pass supplies no image-driven opacity gradient for the affected contribution. We call this failure mode \emph{support collapse}. The underlying cutoff bound has been noted in print only as a design constraint~\cite{fastergs2026}; we demonstrate that it fires in practice as a silent training pathology---training continues without error---and affected Gaussians are difficult to recover under standard optimization. Controlled gsplat CUDA probes show immediate post-reset PSNR drops of 2.7--7.6\,dB under full reset, while resetting only the youngest 20\% limits the drop to 0.0--1.8\,dB. A reset-opacity sweep isolates the transition at the $1/255$ threshold. The fix is a minimal policy change: track each Gaussian's birth step and reset only recently-born Gaussians. The claim is specific to reset-based strategies; gsplat's \texttt{MCMCStrategy}, which relocates low-opacity Gaussians rather than globally resetting opacities, requires separate evaluation.
 
 \keywords{Gaussian splatting \and Differentiable rendering \and Training stability \and Opacity reset \and Endoscopic scene reconstruction}
 \end{abstract}
@@ -45,7 +45,7 @@ gsplat's CUDA rasterizer contains this line:
 if (alpha < 1.0f / 255.0f) continue;
 \end{lstlisting}
 
-It is a sensible optimization: a contribution smaller than one bit in an 8-bit framebuffer is invisible. In inference, this is free. In training, it creates a \textbf{hard boundary in the gradient graph} that interacts catastrophically with a widely-used component of the standard 3DGS training recipe: periodic opacity reset.
+It is a sensible optimization: a contribution smaller than one bit in an 8-bit framebuffer is invisible. In inference, this is free. In training, it creates a \textbf{hard boundary in the gradient graph} that interacts catastrophically with a widely-used component of the standard 3DGS training recipe: periodic opacity reset. The existence of this bound has been observed at the design level---Hahlbohm et al.~\cite{fastergs2026} note in an appendix that a Gaussian with opacity below the cutoff can never be visible or receive gradients, which upper-bounds admissible cutoff values given the standard reset clip. What has not been shown is that the interaction actually fires during ordinary reset-based training, at the fragment level, as a measurable pathology; that is the subject of this report.
 
 The standard training recipe~\cite{kerbl2023} resets \emph{all} Gaussian opacities to 0.01 every 3{,}000 steps; gsplat's reset-based \DefaultStrategy{} follows this design. This is intended as a regularizer. At moderate scale, it works as designed. But as Gaussian count grows and individual Gaussians build mature spatial support, the combination of low post-reset opacity and projection footprint falloff can push effective per-pixel alpha below $1/255$, silencing the image-driven opacity gradient for those contributions. We call this \textbf{support collapse}. In controlled gsplat CUDA probes, the severity depends on training maturity, support radius, and $N$ jointly.
 
@@ -55,12 +55,20 @@ The fix is straightforward: track each Gaussian's birth step, and reset only tho
 
 \paragraph{Contributions.}
 \begin{itemize}
-\item We identify support collapse in gsplat's reset-based default training path: a gradient deadlock caused by the interaction between opacity reset and the renderer's alpha cutoff.
-\item We show the implementation-level deadlock: when all contributing pixels for a Gaussian fall below $\tau = 1/255$, the skipped contributions supply no image-driven opacity gradient.
-\item We reproduce the failure on gsplat CUDA with controlled $N$, maturity, reset-fraction, and threshold-isolation probes.
-\item We fix it with age-gated selective reset: a minimal policy change that yields large gains in controlled CUDA probes.
+\item We give, to our knowledge, the first \emph{empirical} demonstration that the alpha-cutoff/opacity-reset interaction---previously stated only as a design bound~\cite{fastergs2026}---fires in practice in gsplat's reset-based training path, and we give the fragment-level form of the deadlock: the stored post-reset opacity ($0.01$) stays above $\tau$, yet \emph{effective per-pixel} alpha can fall below $\tau$ at every contributing pixel.
+\item We quantify the pathology with controlled $N$, maturity, reset-fraction, and threshold-isolation probes: post-reset drops of 2.7--7.6\,dB under full reset vs 0.0--1.8\,dB under youngest-20\% reset, with the transition isolated at $\tau = 1/255$.
+\item We fix it with \emph{age-gated selective reset}, a minimal backward-compatible policy change; it differs from the SNR-gated selective reset of~\cite{cadam2026} in both criterion (birth step vs gradient SNR) and setting (reset-based NVS training vs generative distillation).
 \item We discuss why reset-based 3DGS training should be audited before deployment in surgical and endoscopic synthesis pipelines.
 \end{itemize}
+
+% ════════════════════════════════════════════════════════════════
+\section{Related Work}
+
+\paragraph{Critiques and replacements of opacity reset.} A growing line of work treats the periodic global reset as a liability at the heuristic level. 3DGS-MCMC~\cite{mcmc2024} replaces the ADC recipe with MCMC-style relocation of low-opacity Gaussians; Bul\`o et al.~\cite{revising2024} identify the reset as a ``shock'' to training dynamics and substitute a gradual opacity decrease; SpotLessSplats~\cite{spotless2025} replaces it with utilization-based pruning; Pi-GS~\cite{pigs2026} measures a sparse-view quality gain simply from disabling the reset. Taming 3DGS~\cite{taming2024} halves the opacity learning rate, which alters post-reset recovery dynamics. None of these analyzes \emph{why} the reset is harmful at the rasterizer level; they motivate replacing it, we explain and measure what it breaks.
+
+\paragraph{Mechanism statements.} Faster-GS~\cite{fastergs2026} (App.~C.4) states the opacity-level bound---a Gaussian with opacity below $\tau$ can never be visible or receive gradients, which caps admissible $\tau$ given the reset clip of $0.01$---as a design constraint, without demonstrating or measuring the pathology in training; the discarded analytic opacity gradients at skipped fragments were earlier noted in~\cite{bagoftricks2025}. Our report complements these with the fragment-level analysis (Sec.~3.3) and the empirical demonstration that the deadlock fires under the \emph{standard} reset clip. StableGS~\cite{stablegs2025} uses the term ``gradient deadlock'' for a different, continuous mechanism (floater pseudo-equilibria in the loss landscape); ours is a discrete masking effect of the rasterizer cutoff.
+
+\paragraph{Selective reset.} CAdam~\cite{cadam2026} proposes an SNR-gated ``selective opacity reset'' in a generative-distillation setting, motivated by momentum corruption. Our age-gated selector targets reset-based NVS training, uses only birth-step metadata already implied by the densification lifecycle, and is evaluated against the cutoff deadlock specifically.
 
 % ════════════════════════════════════════════════════════════════
 \section{Support Collapse}
@@ -205,9 +213,9 @@ sweep.
 Periodic opacity reset can create a gradient deadlock in gsplat's reset-based default training path. The renderer's alpha cutoff is a standard rendering optimization, but it becomes a learning barrier when reset pushes effective alpha below it. Age-gated selective reset avoids the controlled-probe collapse with a minimal policy change. As 3DGS training scales to larger surgical, endoscopic, and general scenes, this failure mode is worth auditing in any pipeline that combines hard alpha gating with unconditional opacity reset.
 
 % ════════════════════════════════════════════════════════════════
-\paragraph{Code and artifacts.} The reproduction entrypoint and JSON evidence are identified by relative paths in the experiments section. Public code and artifacts will be released after completion of double-blind review.
+\paragraph{Code and artifacts.} The reproduction entrypoint and JSON evidence are identified by relative paths in the experiments section. Code and artifacts: \url{https://github.com/randallyanh/gsplat-opacity-reset}.
 
-\begin{thebibliography}{4}
+\begin{thebibliography}{13}
 
 \bibitem{kerbl2023}
 B.~Kerbl, G.~Kopanas, T.~Leimkuhler, G.~Drettakis.
@@ -228,6 +236,33 @@ K.~Wang, C.~Yang, Y.~Wang, S.~Li, Y.~Wang, Q.~Dou, X.~Yang, W.~Shen.
 V.~Ye et~al.
 \newblock gsplat: An Open-Source Library for Gaussian Splatting.
 \newblock \emph{arXiv:2409.06765}, 2024.
+
+\bibitem{fastergs2026}
+Hahlbohm, F., Franke, L., Eisemann, M., Magnor, M.: Faster-GS: Analyzing and improving Gaussian splatting optimization. arXiv:2602.09999 (2026)
+
+\bibitem{mcmc2024}
+Kheradmand, S., et al.: 3D Gaussian splatting as Markov chain Monte Carlo. In: NeurIPS (2024), arXiv:2404.09591
+
+\bibitem{revising2024}
+Rota Bul\`o, S., Porzi, L., Kontschieder, P.: Revising densification in Gaussian splatting. arXiv:2404.06109 (2024)
+
+\bibitem{cadam2026}
+Chung, S., Park, G., Kim, M., Kang, H.: CAdam: Context-adaptive moment estimation for 3D Gaussian densification in generative distillation. arXiv:2605.20872 (2026)
+
+\bibitem{spotless2025}
+Sabour, S., et al.: SpotLessSplats: Ignoring distractors in 3D Gaussian splatting. ACM Trans. Graph. (2025)
+
+\bibitem{pigs2026}
+Hofer, M., Steinberger, M., K\"ohler, T.: Pi-GS: Sparse-view Gaussian splatting with dense $\pi^3$ initialization. arXiv:2602.03327 (2026)
+
+\bibitem{stablegs2025}
+Wang, L., Ren, Q., Liao, K., Wang, H.: StableGS: A floater-free framework for 3D Gaussian splatting. arXiv:2503.18458 (2025)
+
+\bibitem{bagoftricks2025}
+Hahlbohm, F., et al.: A bag of tricks for efficient implicit neural point clouds. In: VMV (2025)
+
+\bibitem{taming2024}
+Mallick, S., et al.: Taming 3DGS: High-quality radiance fields with limited resources. In: SIGGRAPH Asia (2024)
 
 \end{thebibliography}
 
