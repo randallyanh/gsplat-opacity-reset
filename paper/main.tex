@@ -213,7 +213,7 @@ sweep.
 Periodic opacity reset can create a gradient deadlock in gsplat's reset-based default training path. The renderer's alpha cutoff is a standard rendering optimization, but it becomes a learning barrier when reset pushes effective alpha below it. Age-gated selective reset avoids the controlled-probe collapse with a minimal policy change. As 3DGS training scales to larger surgical, endoscopic, and general scenes, this failure mode is worth auditing in any pipeline that combines hard alpha gating with unconditional opacity reset.
 
 % ════════════════════════════════════════════════════════════════
-\paragraph{Code and artifacts.} The reproduction entrypoint and JSON evidence are identified by relative paths in the experiments section. Code and artifacts: \url{https://github.com/randallyanh/gsplat-opacity-reset} (tag \texttt{arxiv-v1}).
+\paragraph{Code and artifacts.} The reproduction entrypoint and JSON evidence are identified by relative paths in the experiments section. Code and artifacts: \url{https://github.com/randallyanh/gsplat-opacity-reset} (tag \texttt{v1.0}).
 
 \begin{thebibliography}{13}
 
